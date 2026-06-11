@@ -155,6 +155,29 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 /* PDF button */
 .btn-pdf{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:12px;background:var(--brand);color:#fff;font-size:15px;font-weight:700;margin-top:14px;transition:background .2s;border:none;cursor:pointer}
 .btn-pdf:hover{background:var(--brand-deep)}
+.btn-compare{width:100%;padding:10px;border-radius:10px;background:var(--surface-2);color:var(--brand);font-size:13px;font-weight:600;border:1px dashed var(--brand);cursor:pointer;transition:all .2s;margin-top:4px}
+.btn-compare:hover{background:var(--fm-bg)}
+
+/* Compare Modal */
+.cmp-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s;padding:16px}
+.cmp-overlay.open{opacity:1;pointer-events:auto}
+.cmp-modal{width:100%;max-width:720px;max-height:88vh;background:var(--surface);border-radius:16px;overflow:hidden;transform:scale(.95);transition:transform .3s}
+.cmp-overlay.open .cmp-modal{transform:scale(1)}
+.cmp-head{padding:20px 20px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
+.cmp-head h2{font-size:18px;font-weight:700}
+.cmp-body{overflow-y:auto;max-height:calc(88vh - 70px);padding:0}
+.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
+.cmp-table th,.cmp-table td{padding:10px 12px;text-align:left;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.cmp-table thead th{background:#f8fafc;font-weight:600;color:var(--ink-2);position:sticky;top:0;z-index:1;font-size:12px}
+.cmp-table thead th:nth-child(2),.cmp-table thead th:nth-child(3){text-align:center;width:110px}
+.cmp-table td:nth-child(2),.cmp-table td:nth-child(3){text-align:center}
+.cmp-table .cat-row td{font-size:11px;font-weight:700;color:var(--brand);background:var(--fm-bg);letter-spacing:.5px}
+.badge-ok{display:inline-block;padding:2px 8px;border-radius:6px;background:#ECFDF5;color:#059669;font-weight:600;font-size:12px}
+.badge-paid{display:inline-block;padding:2px 8px;border-radius:6px;background:#FEF3C7;color:#D97706;font-weight:600;font-size:12px}
+.badge-no{display:inline-block;padding:2px 8px;border-radius:6px;background:#FEE2E2;color:#DC2626;font-weight:600;font-size:12px}
+.badge-free{display:inline-block;padding:2px 8px;border-radius:6px;background:#EBF3FD;color:var(--brand);font-weight:600;font-size:12px}
+.cmp-note{font-size:11px;color:var(--ink-3);margin-top:2px}
+.cmp-footer{padding:12px 20px;text-align:center;font-size:11px;color:var(--ink-3);border-top:1px solid var(--line);background:var(--surface-2)}
 
 /* ── PDF Quote Template (hidden, used for export) ── */
 .pdf-quote{position:absolute;left:-9999px;top:0;width:700px;background:#fff;padding:40px;font-family:var(--font);color:var(--ink)}
@@ -235,13 +258,14 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
       <div class="product-cards" id="productCards" style="grid-template-columns:repeat(2,1fr)">
         <div class="p-card selected" data-product="standard" onclick="selectProduct('standard')">
           <div class="p-name">기본 서비스</div>
-          <div class="p-desc">풀 서비스 건물관리</div>
+          <div class="p-desc">풀 서비스 · 월 50만원~</div>
         </div>
         <div class="p-card" data-product="light" onclick="selectProduct('light')">
           <div class="p-name">라이트 서비스</div>
-          <div class="p-desc">핵심 서비스만</div>
+          <div class="p-desc">핵심만 · 월 30만원~</div>
         </div>
       </div>
+      <button class="btn-compare" onclick="openCompare()">📊 기본 vs 라이트 서비스 비교하기</button>
     </div>
 
     <!-- 3. Score & Base Price (Auto-calculated) -->
@@ -309,6 +333,20 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 
 <!-- ═══ Service Detail Modal ═══ -->
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<!-- ═══ Compare Modal ═══ -->
+<div class="cmp-overlay" id="cmpOverlay" onclick="if(event.target===this)closeCompare()">
+  <div class="cmp-modal">
+    <div class="cmp-head">
+      <h2>📊 기본 vs 라이트 서비스 비교</h2>
+      <button class="modal-close" onclick="closeCompare()">✕</button>
+    </div>
+    <div class="cmp-body">
+      <table class="cmp-table" id="cmpTable"></table>
+    </div>
+    <div class="cmp-footer">※ 라이트 서비스는 핵심 시설관리 중심이며, 추가 항목은 건별 비용이 발생합니다.</div>
+  </div>
+</div>
 
 <!-- ═══ PDF Quote Template (hidden) ═══ -->
 <div class="pdf-quote" id="pdfQuote"></div>
@@ -689,6 +727,66 @@ function exportPDF(){
     html2canvas:{scale:2,useCORS:true},
     jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
   }).from($pdf).save();
+}
+
+/* ═══════════════════════════════════════
+   COMPARE: 기본 vs 라이트 (수정 가능)
+   status: ok=포함, paid=비용발생, no=불가능, free=무료
+   ═══════════════════════════════════════ */
+const CMP_DATA = [
+  { cat:"시설관리" },
+  { name:"정기방문", std:"월 1회", stdS:"ok", lite:"월 1회", liteS:"ok", cost:"", note:"" },
+  { name:"플랫폼 제공", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"" },
+  { name:"정기방문 외 방문", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"1회당 5만원", note:"제한없음 / 50분 내" },
+  { name:"24시간 긴급 출동", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"1회당 10만원", note:"제한없음 / 50분 내" },
+  { name:"브랜딩", std:"무료 제공", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"1회당 20만원", note:"기본: 전체 무료 / 라이트: 현판만 무료" },
+  { name:"공사 견적 산출 및 제안", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"우수협력업체 소개 가능" },
+  { name:"공사 현장 확인 (시작/끝)", std:"O", stdS:"ok", lite:"불가능", liteS:"no", cost:"", note:"우수협력업체 소개 가능" },
+  { name:"입/퇴실 관리 및 원상복구 확인", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"프로젝트당 10만원", note:"전기, 수도, 가스 계약자 확인" },
+  { name:"파트너사 관리", std:"O", stdS:"ok", lite:"불가능", liteS:"no", cost:"", note:"" },
+  { name:"옵션 서비스 선택", std:"O", stdS:"ok", lite:"불가능", liteS:"no", cost:"", note:"" },
+  { name:"법적 의무교육 기록관리", std:"O", stdS:"ok", lite:"불가능", liteS:"no", cost:"", note:"" },
+  { name:"월간 레포트", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"" },
+  { name:"내용증명 작성", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"별도", note:"행정서비스" },
+  { name:"임대차 계약 관리 (중개법인)", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"별도", note:"중개서비스" },
+  { name:"물리보안 컨설팅", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"" },
+  { name:"보험 접수 및 청구", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"" },
+  { cat:"자산관리" },
+  { name:"플랫폼 이슈 관리 & 방문 기록", std:"O", stdS:"ok", lite:"무료", liteS:"free", cost:"", note:"" },
+  { name:"월간 리포트 (대면 2개월 1회)", std:"O", stdS:"ok", lite:"무료", liteS:"free", cost:"", note:"" },
+];
+
+function badgeHTML(status, text){
+  if(status==="ok") return `<span class="badge-ok">${text||'포함'}</span>`;
+  if(status==="paid") return `<span class="badge-paid">${text||'유료'}</span>`;
+  if(status==="no") return `<span class="badge-no">${text||'불가'}</span>`;
+  if(status==="free") return `<span class="badge-free">${text||'무료'}</span>`;
+  return text||"";
+}
+
+function renderCompare(){
+  let html=`<thead><tr><th style="width:40%">항목</th><th>기본 서비스</th><th>라이트 서비스</th><th style="width:22%">비용 / 비고</th></tr></thead><tbody>`;
+  CMP_DATA.forEach(r=>{
+    if(r.cat){
+      html+=`<tr class="cat-row"><td colspan="4">📌 ${r.cat}</td></tr>`;
+    } else {
+      const costNote=[r.cost,r.note].filter(Boolean).join(' · ');
+      html+=`<tr><td>${r.name}</td><td>${badgeHTML(r.stdS,r.std)}</td><td>${badgeHTML(r.liteS,r.lite)}</td><td style="font-size:11px;color:var(--ink-2)">${costNote}</td></tr>`;
+    }
+  });
+  html+=`<tr style="background:#f0f7ff;font-weight:700"><td>최소 월 비용</td><td style="text-align:center;color:var(--brand)">50만원~</td><td style="text-align:center;color:var(--lm)">30만원~</td><td></td></tr>`;
+  html+=`</tbody>`;
+  document.getElementById("cmpTable").innerHTML=html;
+}
+
+function openCompare(){
+  renderCompare();
+  document.getElementById("cmpOverlay").classList.add("open");
+  document.body.style.overflow="hidden";
+}
+function closeCompare(){
+  document.getElementById("cmpOverlay").classList.remove("open");
+  document.body.style.overflow="";
 }
 
 /* ═══════════════════════════════════════
