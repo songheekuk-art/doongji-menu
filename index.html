@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>둥지 · 서비스 메뉴판</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+:root{
+  --brand:#3B8CE4; --brand-deep:#2563A8; --brand-ink:#16324f;
+  --bg:#F0F3F8; --surface:#ffffff; --surface-2:#f7f9fc;
+  --ink:#16233a; --ink-2:#56657c; --ink-3:#8a98ad;
+  --line:#e3e9f1;
+  --fm:#3B8CE4; --fm-bg:#EBF3FD;
+  --ad:#E67E22; --ad-bg:#FEF5E7;
+  --hr:#EC4899; --hr-bg:#FDF2F8;
+  --lm:#10B981; --lm-bg:#ECFDF5;
+  --pm:#8B5CF6; --pm-bg:#F3F0FF;
+  --shadow:0 1px 3px rgba(22,50,79,.06);
+  --shadow-hover:0 4px 16px rgba(22,50,79,.1);
+  --radius:14px; --radius-sm:10px;
+  --font:'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100vh}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.5}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+
+/* ── Header ── */
+.header{
+  background:linear-gradient(135deg, var(--brand-ink) 0%, var(--brand-deep) 40%, var(--brand) 100%);
+  color:#fff; padding:28px 24px 24px;
+}
+.header-inner{max-width:960px;margin:0 auto}
+.header-brand{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.header-mark{
+  width:36px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,.15);
+  display:grid;place-items:center;
+  font-size:17px;font-weight:800;letter-spacing:-1px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.2);
+}
+.header-label{font-size:12px;opacity:.7;letter-spacing:1.5px;text-transform:uppercase;font-weight:500}
+.header h1{font-size:24px;font-weight:700;margin:4px 0 2px;line-height:1.3}
+.header p{font-size:14px;opacity:.8;font-weight:400}
+
+/* ── Tabs ── */
+.tabs-wrap{max-width:960px;margin:0 auto;padding:16px 16px 8px}
+.tabs{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{
+  padding:8px 16px;border-radius:20px;font-size:13px;font-weight:500;
+  white-space:nowrap;transition:all .2s;
+  background:var(--surface);color:var(--ink-2);
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.tab:hover{color:var(--ink)}
+.tab.active{color:#fff;font-weight:600}
+.tab.active[data-cat="ALL"]{background:#475569}
+.tab.active[data-cat="FM"]{background:var(--fm);box-shadow:0 2px 8px rgba(59,140,228,.3)}
+.tab.active[data-cat="AD"]{background:var(--ad);box-shadow:0 2px 8px rgba(230,126,34,.3)}
+.tab.active[data-cat="HR"]{background:var(--hr);box-shadow:0 2px 8px rgba(236,72,153,.3)}
+.tab.active[data-cat="LM"]{background:var(--lm);box-shadow:0 2px 8px rgba(16,185,129,.3)}
+.tab.active[data-cat="PM"]{background:var(--pm);box-shadow:0 2px 8px rgba(139,92,246,.3)}
+
+/* ── Category Section ── */
+.cat-section{margin-bottom:28px}
+.cat-header{display:flex;align-items:center;gap:8px;padding:0 4px;margin-bottom:12px}
+.cat-bar{width:4px;height:20px;border-radius:2px}
+.cat-bar[data-c="FM"]{background:var(--fm)}
+.cat-bar[data-c="AD"]{background:var(--ad)}
+.cat-bar[data-c="HR"]{background:var(--hr)}
+.cat-bar[data-c="LM"]{background:var(--lm)}
+.cat-bar[data-c="PM"]{background:var(--pm)}
+.cat-title{font-size:16px;font-weight:700;color:var(--ink)}
+.cat-desc{font-size:12px;color:var(--ink-3)}
+
+/* ── Service Grid ── */
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+  gap:12px;
+}
+.card{
+  padding:18px;background:var(--surface);border-radius:var(--radius);
+  border:1px solid var(--line);
+  box-shadow:var(--shadow);
+  cursor:pointer;transition:all .2s ease;
+}
+.card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover)}
+.card:hover[data-c="FM"]{border-color:rgba(59,140,228,.35)}
+.card:hover[data-c="AD"]{border-color:rgba(230,126,34,.35)}
+.card:hover[data-c="HR"]{border-color:rgba(236,72,153,.35)}
+.card:hover[data-c="LM"]{border-color:rgba(16,185,129,.35)}
+.card:hover[data-c="PM"]{border-color:rgba(139,92,246,.35)}
+.card-top{display:flex;align-items:center;justify-content:space-between}
+.card-left{display:flex;align-items:center;gap:12px}
+.card-icon{
+  width:42px;height:42px;border-radius:12px;
+  display:grid;place-items:center;font-size:20px;flex:none;
+}
+.card-icon[data-c="FM"]{background:var(--fm-bg)}
+.card-icon[data-c="AD"]{background:var(--ad-bg)}
+.card-icon[data-c="HR"]{background:var(--hr-bg)}
+.card-icon[data-c="LM"]{background:var(--lm-bg)}
+.card-icon[data-c="PM"]{background:var(--pm-bg)}
+.card-name{font-size:15px;font-weight:700;color:var(--ink)}
+.card-sub{font-size:12px;color:var(--ink-3);margin-top:1px}
+.card-arrow{font-size:16px;opacity:.3;transition:opacity .2s}
+.card-arrow[data-c="FM"]{color:var(--fm)}
+.card-arrow[data-c="AD"]{color:var(--ad)}
+.card-arrow[data-c="HR"]{color:var(--hr)}
+.card-arrow[data-c="LM"]{color:var(--lm)}
+.card-arrow[data-c="PM"]{color:var(--pm)}
+.card:hover .card-arrow{opacity:1}
+.card-desc{margin-top:10px;font-size:12.5px;color:var(--ink-2);line-height:1.5}
+
+/* ── Modal Overlay ── */
+.overlay{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,.4);
+  display:flex;align-items:flex-end;justify-content:center;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  opacity:0;pointer-events:none;transition:opacity .25s;
+}
+.overlay.open{opacity:1;pointer-events:auto}
+.modal{
+  width:100%;max-width:600px;max-height:85vh;
+  background:var(--surface);
+  border-radius:20px 20px 0 0;
+  overflow-y:auto;
+  transform:translateY(100%);transition:transform .3s ease;
+}
+.overlay.open .modal{transform:translateY(0)}
+
+/* ── Modal Content ── */
+.modal-head{
+  padding:24px 24px 16px;
+  border-bottom:1px solid var(--line);
+  position:sticky;top:0;background:var(--surface);
+  border-radius:20px 20px 0 0;z-index:1;
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+}
+.modal-badge{
+  display:inline-block;padding:3px 10px;border-radius:12px;
+  font-size:11px;font-weight:600;margin-bottom:6px;
+}
+.modal-badge[data-c="FM"]{background:var(--fm-bg);color:var(--fm)}
+.modal-badge[data-c="AD"]{background:var(--ad-bg);color:var(--ad)}
+.modal-badge[data-c="HR"]{background:var(--hr-bg);color:var(--hr)}
+.modal-badge[data-c="LM"]{background:var(--lm-bg);color:var(--lm)}
+.modal-badge[data-c="PM"]{background:var(--pm-bg);color:var(--pm)}
+.modal-title{font-size:21px;font-weight:700;color:var(--ink);margin:4px 0 2px}
+.modal-desc{font-size:14px;color:var(--ink-2);line-height:1.5}
+.modal-close{
+  width:32px;height:32px;border-radius:16px;
+  background:#F1F5F9;display:grid;place-items:center;
+  font-size:15px;color:var(--ink-2);flex:none;
+  transition:background .15s;
+}
+.modal-close:hover{background:#E2E8F0}
+
+.modal-body{padding:16px 24px 32px}
+.detail-section{
+  margin-bottom:14px;padding:16px;
+  background:var(--surface-2);border-radius:12px;
+}
+.detail-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.detail-num{
+  width:24px;height:24px;border-radius:6px;
+  color:#fff;font-size:12px;font-weight:700;
+  display:grid;place-items:center;flex:none;
+}
+.detail-num[data-c="FM"]{background:var(--fm)}
+.detail-num[data-c="AD"]{background:var(--ad)}
+.detail-num[data-c="HR"]{background:var(--hr)}
+.detail-num[data-c="LM"]{background:var(--lm)}
+.detail-num[data-c="PM"]{background:var(--pm)}
+.detail-heading{font-size:15px;font-weight:700;color:var(--ink)}
+.detail-item{
+  display:flex;align-items:flex-start;gap:8px;
+  font-size:13.5px;color:var(--ink-2);line-height:1.5;
+  margin-bottom:4px;
+}
+.dot{margin-top:3px;flex:none;font-size:10px}
+.dot[data-c="FM"]{color:var(--fm)}
+.dot[data-c="AD"]{color:var(--ad)}
+.dot[data-c="HR"]{color:var(--hr)}
+.dot[data-c="LM"]{color:var(--lm)}
+.dot[data-c="PM"]{color:var(--pm)}
+
+.price-placeholder{
+  margin-top:8px;padding:16px;
+  background:linear-gradient(135deg,#F0F7FF,#EBF3FD);
+  border-radius:12px;border:1px dashed #93C5FD;
+  text-align:center;
+}
+.price-placeholder p{font-size:13px;color:#3B82F6;font-weight:500}
+.price-placeholder .sub{font-size:12px;color:#93C5FD;margin-top:3px;font-weight:400}
+
+/* ── Footer ── */
+.footer{text-align:center;padding:20px 16px 32px;font-size:12px;color:var(--ink-3)}
+.footer .co{font-weight:600;color:var(--ink-2);margin-bottom:3px}
+
+/* ── Responsive ── */
+@media(max-width:480px){
+  .header{padding:22px 18px 20px}
+  .header h1{font-size:21px}
+  .grid{grid-template-columns:1fr;gap:10px}
+  .modal{max-height:90vh}
+  .cat-desc{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-inner">
+    <div class="header-brand">
+      <div class="header-mark">둥</div>
+      <span class="header-label">Doongji FM</span>
+    </div>
+    <h1>서비스 메뉴판</h1>
+    <p>건물관리의 모든 것 — 12개 서비스 라인업</p>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs-wrap">
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<!-- Content -->
+<div id="content" style="max-width:960px;margin:0 auto;padding:4px 16px 40px"></div>
+
+<!-- Modal -->
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  <p class="co">둥지 | 1577-9489</p>
+  <p>건물주가 온전히 본업과 여가생활에 집중할 수 있도록</p>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   DATA
+   ══════════════════════════════════════════ */
+const CATS = {
+  FM:{ label:"FM · 시설관리", color:"var(--fm)", desc:"건물 시설의 안전과 가치를 유지하는 핵심 관리 서비스" },
+  AD:{ label:"행정관리", color:"var(--ad)", desc:"청구·수납·세무·연체까지 관리 행정 전반" },
+  HR:{ label:"인적관리", color:"var(--hr)", desc:"경비·미화·시설관리 인력의 채용·교육·관리" },
+  LM:{ label:"LM · 수익률관리", color:"var(--lm)", desc:"공실 최소화와 수익 극대화를 위한 임대차 관리" },
+  PM:{ label:"PM · 자산관리", color:"var(--pm)", desc:"건물 자산의 가치를 높이는 종합 관리 서비스" },
+};
+
+const SERVICES = [
+  { id:1, cat:"FM", icon:"🔧", title:"시설 관리", sub:"정기점검 · 사전/사후 관리",
+    desc:"정기 방문 점검과 사전·사후 관리로 건물 가치를 유지합니다",
+    details:[
+      {h:"정기 방문 점검", items:["월 1회 정기방문","50항목 시설점검 체크리스트","점검 리포트(사진) 당일 발송"]},
+      {h:"사전 관리", items:["계절별 하자 사전점검·예방","내용연수 증대 효과","법정점검 캘린더 관리","과태료 리스크 차단"]},
+      {h:"사후 관리", items:["시설물 점검 보고서 작성","보수 후 하자 여부 확인","공사 중 관리감독·현장 정리"]},
+      {h:"민원 관리", items:["아웃소싱 업체 관리·통제","비교 견적 통한 합리적 지출","임대인·임차인 민원 원스톱","입·퇴실 시설 상태 확인"]},
+    ],
+  },
+  { id:2, cat:"FM", icon:"🚨", title:"24시간 긴급출동", sub:"긴급 대응 서비스",
+    desc:"월 2회 기본 포함, 서울 60분 이내 도착 목표",
+    details:[
+      {h:"기본 출동", items:["옵션에 따라 무상 제공","서울 90분·수도권 120분 이내"]},
+      {h:"추가 출동", items:["기본 초과 시 건당 50,000원(VAT별도)"]},
+      {h:"대응 범위", items:["누수·화재 등 긴급 민원 관리","임차인 긴급 민원","현장 1차 응급조치","후속 조치 보고"]},
+    ],
+  },
+  { id:3, cat:"FM", icon:"🏗️", title:"공사 관리", sub:"견적 · 현장 · 계약검토",
+    desc:"비교 견적부터 현장 관리, 계약 검토까지 공사 전 과정 관리",
+    details:[
+      {h:"비교 견적", items:["2~3개 업체 비교 견적 확보","비용·품질·기간 비교표 제공"]},
+      {h:"공사 제안", items:["하자 발견 시 예방 공사 제안","긴급 보수 vs 계획 수선 구분"]},
+      {h:"현장 관리", items:["공사 착수 시 현장 확인","완료 시 검수 확인","하자 시 A/S 요청 대행"]},
+      {h:"계약 검토", items:["공사 계약서 검토·체결 지원","하자보수 기간·범위·보증 확인"]},
+    ],
+  },
+  { id:4, cat:"AD", icon:"📋", title:"행정 관리", sub:"청구 · 세무 · 법무",
+    desc:"청구·수납·세무·법무까지 관리 행정 전반을 처리합니다",
+    details:[
+      {h:"청구·수납", items:["매월 관리비·임대료·공과금 발송","수납 확인 및 미수금 관리","미납 시 단계별 독촉 발송"]},
+      {h:"세무 지원", items:["세금계산서 발행","부가세 신고 등 세무 업무 지원"]},
+      {h:"서류·공지", items:["각종 공지사항 안내","건물 서류·계약서 보관","전자문서 통합 보관 (플랫폼)"]},
+    ],
+  },
+  { id:5, cat:"AD", icon:"💰", title:"연체 관리", sub:"단계별 연체관리 시스템",
+    desc:"체계적 연체 관리 시스템으로 안정적 수익 창출",
+    details:[
+      {h:"단계별 연체관리", items:["1단계: 임차인 미팅 및 독촉","2단계: 내용증명 발송 (1·2·3차)","3단계: 합의 명도 유도","4단계: 법적 조치 (명도소송)"]},
+      {h:"퇴실 정산", items:["미납 임대료·관리비·공과금 정산","폐업 또는 주소 이전 확인","원상복구 확인 후 보증금 정산"]},
+      {h:"기대 효과", items:["안정적 수익 창출·비용 절감","임차인과의 대립·마찰 감소","건물 이미지 상승"]},
+    ],
+  },
+  { id:6, cat:"HR", icon:"👥", title:"인적 관리", sub:"채용 · 교육 · 근태관리",
+    desc:"경비·미화·시설관리 인력의 채용부터 교육·관리까지",
+    details:[
+      {h:"채용 대행", items:["경비·미화·시설관리 인력","구인·면접·채용 대행"]},
+      {h:"교육·관리", items:["쾌적한 임대 여건 조성 교육","인력 활용능력 향상","건물 안전·유지보수 교육","근태 관리, 교체 시 재채용"]},
+      {h:"시설 담당자 관리", items:["승강기·전기·소방 등","각 시설 담당자 관리·감독"]},
+    ],
+  },
+  { id:7, cat:"PM", icon:"📊", title:"PM 자산관리 ①", sub:"레포트 · 보험 · 법률",
+    desc:"월간 레포트, 보안·보험 컨설팅, 법률 지원",
+    details:[
+      {h:"월간 레포트", items:["수입·지출 현황","공실·임차인 변동","시설점검 결과","미납 현황","이슈 및 조치사항","다음 달 예정 업무"]},
+      {h:"보안·보험", items:["CCTV·물리보안 컨설팅","화재보험 적정성 검토·가입","사고 시 보험 클레임 대행"]},
+      {h:"법률 지원", items:["내용증명 작성 및 발송","임대료 미납 시 명도소송 주관","제소 전 화해조서 지원","건물 관련 소송 자문 연계","(별도 법률비용 발생)"]},
+    ],
+  },
+  { id:8, cat:"PM", icon:"🤝", title:"PM 자산관리 ②", sub:"용역사 · 임차인 관리",
+    desc:"용역사 관리와 임차인 관계 관리로 건물 운영 품질 향상",
+    details:[
+      {h:"용역사·외주 관리", items:["소방·승강기·전기·청소 등","용역사 연간 성과 평가","서비스 품질 미달 시 교체 지원","비교 견적 통한 용역비 검증"]},
+      {h:"임차인 관계 관리", items:["반기별 임차인 만족도 설문","결과 분석·개선 방안 보고","임차인 이탈 조기 감지·예방","앵커 테넌트 이탈 방지"]},
+    ],
+  },
+  { id:9, cat:"LM", icon:"📈", title:"수익률 관리", sub:"공실 · 갱신 · 명의변경",
+    desc:"공실 최소화와 수익 극대화를 위한 임대차 전략 관리",
+    details:[
+      {h:"공실 관리", items:["임대 시장 분석 및 스케줄 관리","임대가 산정·임대 전략 수립","온라인·오프라인 마케팅","협력 부동산·프랜차이즈 홍보","우량 업체 선별 및 유치","예비 임차인 관리·투어 안내"]},
+      {h:"갱신 계약", items:["만료 6개월 전 1차 의사 확인","만료 3개월 전 2차 의사 확인","물가상승률·주변시세 보고서","임대료 인상률 조정·협의","만료 1~2개월 전 계약서 완료"]},
+      {h:"명의 변경", items:["신규 임차인 미팅·업종 분석","시세보고서 작성·인상률 조정","기존 임차인 서류·보증금 정산","명의변경 계약서 작성 완료"]},
+      {h:"임대차 현황", items:["임대차 계약서 작성·검토·보관","임대료 적정성 분석 (시세 조사)","갱신 시 적정 인상률 제안","임대차 현황 실시간 최신화"]},
+    ],
+  },
+  { id:10, cat:"LM", icon:"🏠", title:"전용부 관리", sub:"세대 내 시설관리",
+    desc:"원룸·고시원·다가구·사옥 등 세대 내 시설관리",
+    details:[
+      {h:"대상 건물", items:["원룸·고시원·다가구·사옥 등","세대 내(전용부) 시설 전반"]},
+      {h:"기본 서비스", items:["조명 교체·수전 수리·도어록 점검","경미 보수 월 N건 기본 포함"]},
+      {h:"추가·접수", items:["기본 건수 초과 시 건당 별도","대형 공사는 별도 견적","임차인 플랫폼 직접 접수","처리 상황 실시간 확인"]},
+    ],
+  },
+  { id:11, cat:"PM", icon:"✨", title:"브랜딩 서비스", sub:"건물 이미지 컨설팅",
+    desc:"건물 이미지 컨설팅으로 자산 가치를 높입니다",
+    details:[
+      {h:"초기 브랜딩 (계약 특전)", items:["계약 체결 시 1회 무상 제공","건물명 사인물 디자인","공용부 환경 개선 제안","건물 외관 이미지 컨설팅"]},
+    ],
+  },
+  { id:12, cat:"PM", icon:"💻", title:"자산관리 플랫폼", sub:"둥지OS",
+    desc:"임대인·임차인 모두를 위한 투명한 관리 시스템",
+    details:[
+      {h:"임대인 대시보드", items:["공실률·수납률·민원처리율","재무 리포트 자동 집계","엑셀 다운로드"]},
+      {h:"임차인 포털", items:["관리비 조회·납부","시설보수 접수","공지사항 확인"]},
+      {h:"이슈·계약 관리", items:["민원·공사·점검 이슈 추적","계약 만료 알림·갱신 히스토리","임대료 변동 추적"]},
+      {h:"문서 보관함", items:["계약서·세금계산서·내용증명","점검 리포트 등 통합 보관"]},
+    ],
+  },
+];
+
+/* ══════════════════════════════════════════
+   STATE & RENDER
+   ══════════════════════════════════════════ */
+let activeCat = "ALL";
+
+const $tabs = document.getElementById("tabs");
+const $content = document.getElementById("content");
+const $overlay = document.getElementById("overlay");
+const $modal = document.getElementById("modal");
+
+// ── Tabs ──
+function renderTabs(){
+  const tabDefs = [
+    {key:"ALL", label:"전체"},
+    {key:"FM", label:"FM 시설관리"},
+    {key:"AD", label:"행정관리"},
+    {key:"HR", label:"인적관리"},
+    {key:"LM", label:"LM 수익률"},
+    {key:"PM", label:"PM 자산관리"},
+  ];
+  $tabs.innerHTML = tabDefs.map(t =>
+    `<button class="tab${activeCat===t.key?' active':''}" data-cat="${t.key}">${t.label}</button>`
+  ).join("");
+  $tabs.querySelectorAll(".tab").forEach(btn => {
+    btn.addEventListener("click", () => { activeCat = btn.dataset.cat; renderTabs(); renderContent(); });
+  });
+}
+
+// ── Card HTML ──
+function cardHTML(s){
+  return `<div class="card" data-c="${s.cat}" data-id="${s.id}">
+    <div class="card-top">
+      <div class="card-left">
+        <div class="card-icon" data-c="${s.cat}">${s.icon}</div>
+        <div>
+          <div class="card-name">${s.title}</div>
+          <div class="card-sub">${s.sub}</div>
+        </div>
+      </div>
+      <span class="card-arrow" data-c="${s.cat}">→</span>
+    </div>
+    <div class="card-desc">${s.desc}</div>
+  </div>`;
+}
+
+// ── Content ──
+function renderContent(){
+  let html = "";
+  if(activeCat === "ALL"){
+    for(const [ck, cv] of Object.entries(CATS)){
+      const items = SERVICES.filter(s => s.cat === ck);
+      html += `<div class="cat-section">
+        <div class="cat-header">
+          <div class="cat-bar" data-c="${ck}"></div>
+          <span class="cat-title">${cv.label}</span>
+          <span class="cat-desc">${cv.desc}</span>
+        </div>
+        <div class="grid">${items.map(cardHTML).join("")}</div>
+      </div>`;
+    }
+  } else {
+    const items = SERVICES.filter(s => s.cat === activeCat);
+    html = `<div class="grid">${items.map(cardHTML).join("")}</div>`;
+  }
+  $content.innerHTML = html;
+
+  // Bind clicks
+  $content.querySelectorAll(".card").forEach(card => {
+    card.addEventListener("click", () => openModal(+card.dataset.id));
+  });
+}
+
+// ── Modal ──
+function openModal(id){
+  const s = SERVICES.find(x => x.id === id);
+  if(!s) return;
+  const c = s.cat;
+  $modal.innerHTML = `
+    <div class="modal-head">
+      <div>
+        <div class="modal-badge" data-c="${c}">${CATS[c].label}</div>
+        <div class="modal-title">${s.icon} ${s.title}</div>
+        <div class="modal-desc">${s.desc}</div>
+      </div>
+      <button class="modal-close" id="modalClose">✕</button>
+    </div>
+    <div class="modal-body">
+      ${s.details.map((d,i) => `
+        <div class="detail-section">
+          <div class="detail-head">
+            <div class="detail-num" data-c="${c}">${i+1}</div>
+            <div class="detail-heading">${d.h}</div>
+          </div>
+          ${d.items.map(it => `
+            <div class="detail-item">
+              <span class="dot" data-c="${c}">●</span>
+              <span>${it}</span>
+            </div>
+          `).join("")}
+        </div>
+      `).join("")}
+      <div class="price-placeholder">
+        <p>💡 가격 정보는 추후 업데이트 예정입니다</p>
+        <p class="sub">상담 문의: 1577-9489</p>
+      </div>
+    </div>
+  `;
+  $overlay.classList.add("open");
+  document.getElementById("modalClose").addEventListener("click", closeModal);
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(){
+  $overlay.classList.remove("open");
+  document.body.style.overflow = "";
+}
+
+$overlay.addEventListener("click", e => { if(e.target === $overlay) closeModal(); });
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeModal(); });
+
+// ── Init ──
+renderTabs();
+renderContent();
+</script>
+</body>
+</html>
