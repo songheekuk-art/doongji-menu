@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>둥지 CRM — 영업팀 고객관리</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
   /* ===== LAUNCHER BACK BUTTON ===== */
@@ -1198,16 +1198,19 @@
 
 <!-- ===================== SCRIPTS ===================== -->
 <script>
-/* supabase 전역 객체 안전 확인 */
-if (typeof supabase === 'undefined') {
-  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;flex-direction:column;gap:12px"><div style="font-size:32px">⚠️</div><div style="font-size:16px;font-weight:600">Supabase 라이브러리를 불러오지 못했습니다.</div><div style="font-size:13px;color:#888">인터넷 연결을 확인하고 새로고침 해주세요.</div><button onclick="location.reload()" style="margin-top:8px;padding:8px 20px;background:#3B8CE4;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">새로고침</button></div>';
-}
 /* ============================================================
    SUPABASE 설정
    ============================================================ */
 const SUPABASE_URL = 'https://qsinuxsloamscbsyptmf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzaW51eHNsb2Ftc2Nic3lwdG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMDM2NjgsImV4cCI6MjA5OTU3OTY2OH0.nEHc9vya_GcHiSrrbISY1yLLrBdDX8Dx5mJaCdV8dsQ';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* supabase-js v2 UMD 빌드는 window.supabase.createClient 로 노출 */
+let sb = null;
+try {
+  sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+} catch(e) {
+  console.error('Supabase 초기화 실패:', e);
+}
 
 /* ============================================================
    DATA LAYER — Supabase
@@ -1303,6 +1306,10 @@ function showError(msg) {
 
 /* ── 전체 데이터 로드 ── */
 async function persistLoad() {
+  if (!sb) {
+    setDbStatus('error', 'DB 연결 안 됨');
+    return;
+  }
   showLoading('불러오는 중...');
   try {
     const [b, l, p, i, w] = await Promise.all([
