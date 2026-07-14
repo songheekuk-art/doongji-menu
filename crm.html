@@ -1,0 +1,2190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>둥지 CRM — 영업팀 고객관리</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+  /* ===== LAUNCHER BACK BUTTON ===== */
+  .back-to-launcher {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    margin: 12px 6px 4px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    background: var(--surface-0);
+    transition: all .12s;
+  }
+  .back-to-launcher:hover { color: var(--brand); border-color: var(--brand-border); background: var(--brand-light); }
+  .back-to-launcher i { font-size: 15px; }
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; font-family: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 14px; color: #1a1a1a; background: #f5f6f8; }
+
+  /* ===== BRAND ===== */
+  :root {
+    --brand: #3B8CE4;
+    --brand-dark: #1a6cc7;
+    --brand-light: #EBF3FD;
+    --brand-border: #b3d3f5;
+
+    --surface-0: #f5f6f8;
+    --surface-1: #ffffff;
+    --surface-2: #fafafa;
+
+    --text-primary: #1a1a1a;
+    --text-secondary: #555;
+    --text-muted: #999;
+
+    --border: #e5e7eb;
+    --border-strong: #d1d5db;
+
+    --green: #16a34a; --green-bg: #f0fdf4; --green-border: #bbf7d0;
+    --amber: #d97706; --amber-bg: #fffbeb; --amber-border: #fde68a;
+    --red: #dc2626;   --red-bg: #fef2f2;   --red-border: #fecaca;
+    --blue: #3B8CE4;  --blue-bg: #EBF3FD;  --blue-border: #b3d3f5;
+
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  }
+
+  /* ===== LAYOUT ===== */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* --- Sidebar --- */
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--surface-1);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .logo {
+    padding: 20px 18px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-brand { font-size: 17px; font-weight: 700; color: var(--brand); letter-spacing: -0.3px; }
+  .logo-sub   { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  .nav-section { padding: 12px 10px 4px; font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 9px 14px;
+    margin: 1px 6px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-secondary);
+    transition: background .12s, color .12s;
+    border: none;
+    background: none;
+    width: calc(100% - 12px);
+    text-align: left;
+  }
+  .nav-item i { font-size: 17px; }
+  .nav-item:hover  { background: var(--surface-0); color: var(--text-primary); }
+  .nav-item.active { background: var(--brand-light); color: var(--brand); font-weight: 600; }
+
+  /* --- Main --- */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .topbar {
+    background: var(--surface-1);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .topbar-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+
+  .content { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* ===== PAGES ===== */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .12s;
+    border: 1px solid transparent;
+    line-height: 1;
+  }
+  .btn i { font-size: 15px; }
+  .btn-primary  { background: var(--brand); color: #fff; }
+  .btn-primary:hover { background: var(--brand-dark); }
+  .btn-secondary { background: var(--surface-1); color: var(--text-secondary); border-color: var(--border-strong); }
+  .btn-secondary:hover { background: var(--surface-0); color: var(--text-primary); }
+  .btn-danger   { background: var(--red-bg); color: var(--red); border-color: var(--red-border); }
+  .btn-danger:hover { background: #fee2e2; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+  /* ===== STATS ===== */
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+  }
+  .stat-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 6px; }
+  .stat-value { font-size: 26px; font-weight: 700; line-height: 1; }
+  .stat-sub   { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .c-blue   { color: var(--brand); }
+  .c-green  { color: var(--green); }
+  .c-amber  { color: var(--amber); }
+  .c-red    { color: var(--red); }
+
+  /* ===== ALERT ===== */
+  .alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    margin-bottom: 20px;
+    border: 1px solid;
+  }
+  .alert i { font-size: 17px; flex-shrink: 0; }
+  .alert-warning { background: var(--amber-bg); border-color: var(--amber-border); color: var(--amber); }
+
+  /* ===== SECTION HEADER ===== */
+  .section-hd {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .section-hd h2 { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+
+  /* ===== BUILDING CARDS ===== */
+  .building-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .bcard {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    cursor: pointer;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .bcard:hover { border-color: var(--brand-border); box-shadow: var(--shadow-sm); }
+  .bcard-name { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+  .bcard-addr { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bcard-owner { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin-bottom: 6px; }
+  .bcard-owner i { font-size: 13px; }
+  .bcard-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .bcard-next { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 3px; }
+  .bcard-next i { font-size: 11px; }
+
+  /* ===== BADGES ===== */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 99px;
+    border: 1px solid;
+  }
+  .badge-blue   { background: var(--blue-bg);  color: var(--blue);  border-color: var(--blue-border); }
+  .badge-green  { background: var(--green-bg); color: var(--green); border-color: var(--green-border); }
+  .badge-amber  { background: var(--amber-bg); color: var(--amber); border-color: var(--amber-border); }
+  .badge-red    { background: var(--red-bg);   color: var(--red);   border-color: var(--red-border); }
+  .badge-purple { background: #faf5ff;         color: #6d28d9;      border-color: #ddd6fe; }
+  .badge-red    { background: var(--red-bg);   color: var(--red);   border-color: var(--red-border); }
+  .badge-gray   { background: #f3f4f6;         color: #6b7280;      border-color: #e5e7eb; }
+
+  /* ===== TABLE ===== */
+  .table-wrap { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--surface-0); }
+  th { padding: 10px 14px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text-secondary); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface-0); }
+  .td-name { font-weight: 600; color: var(--text-primary); }
+
+  /* ===== CALENDAR ===== */
+  .cal-nav-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .cal-nav-btn {
+    width: 30px; height: 30px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface-1);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    color: var(--text-secondary);
+    transition: background .12s;
+  }
+  .cal-nav-btn:hover { background: var(--surface-0); }
+  .cal-title { font-size: 15px; font-weight: 600; }
+  .cal-legend { margin-left: auto; display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-muted); }
+  .cal-legend-dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+
+  .cal-grid-wrap { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+  .cal-dow-row { display: grid; grid-template-columns: repeat(7, 1fr); background: var(--surface-0); border-bottom: 1px solid var(--border); }
+  .cal-dow { padding: 8px 0; text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .cal-days { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .cal-cell {
+    min-height: 80px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 6px;
+    cursor: pointer;
+    transition: background .1s;
+  }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell:hover { background: #f9fafb; }
+  .cal-cell.other { background: #fafafa; }
+  .cal-cell.other .day-num { color: #ccc; }
+  .day-num {
+    font-size: 12px;
+    font-weight: 600;
+    width: 22px; height: 22px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 3px;
+  }
+  .cal-cell.today .day-num {
+    background: var(--brand);
+    color: #fff;
+    border-radius: 50%;
+  }
+  .cal-event {
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+  .cal-event.meet  { background: #EBF3FD; color: #1a5fa8; border-left: 2px solid #3B8CE4; }
+  .cal-event.call  { background: #f0fdf4; color: #15803d; border-left: 2px solid #16a34a; }
+  .cal-event.email { background: #faf5ff; color: #6d28d9; border-left: 2px solid #7c3aed; }
+  .cal-event.kakao { background: #fffbeb; color: #b45309; border-left: 2px solid #d97706; }
+  .cal-event.sms   { background: #fef2f2; color: #b91c1c; border-left: 2px solid #dc2626; }
+  .cal-more { font-size: 10px; color: var(--text-muted); padding: 1px 2px; }
+
+  /* ===== LOG ITEMS ===== */
+  .log-feed { display: flex; flex-direction: column; gap: 0; }
+  .log-item {
+    display: flex;
+    gap: 12px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-icon {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .log-icon.meet  { background: #EBF3FD; }
+  .log-icon.meet  i { color: #3B8CE4; font-size: 16px; }
+  .log-icon.call  { background: #f0fdf4; }
+  .log-icon.call  i { color: #16a34a; font-size: 16px; }
+  .log-icon.email { background: #faf5ff; }
+  .log-icon.email i { color: #7c3aed; font-size: 16px; }
+  .log-icon.kakao { background: #fffbeb; }
+  .log-icon.kakao i { color: #d97706; font-size: 16px; }
+  .log-icon.sms   { background: #fef2f2; }
+  .log-icon.sms   i { color: #dc2626; font-size: 16px; }
+  .log-body { flex: 1; min-width: 0; }
+  .log-row1 { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; flex-wrap: wrap; }
+  .log-bld  { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .log-date { font-size: 11px; color: var(--text-muted); margin-left: auto; white-space: nowrap; }
+  .log-content { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+  .log-next { font-size: 11px; color: var(--text-muted); margin-top: 3px; display: flex; align-items: center; gap: 3px; }
+  .log-next i { font-size: 11px; }
+
+  /* ===== FILTER BAR ===== */
+  .filter-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-bar select { padding: 7px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--surface-1); font-size: 13px; color: var(--text-secondary); cursor: pointer; }
+  .filter-bar select:focus { outline: none; border-color: var(--brand); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface-1);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 24px;
+    width: 500px;
+    max-width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 30px rgba(0,0,0,.12);
+  }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 20px; display: flex; align-items: center; padding: 2px; border-radius: 4px; }
+  .modal-close:hover { color: var(--text-primary); background: var(--surface-0); }
+
+  /* ===== FORM ===== */
+  .form-row { margin-bottom: 14px; }
+  .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+  label.f-label { display: block; font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 5px; }
+  .req { color: var(--red); }
+  input.f-input, select.f-input, textarea.f-input {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: #fff;
+    font-size: 13px;
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: border-color .12s;
+  }
+  input.f-input:focus, select.f-input:focus, textarea.f-input:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 3px rgba(59,140,228,.1);
+  }
+  textarea.f-input { resize: vertical; }
+  .form-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .form-section-label { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 12px; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+  /* ===== DETAIL MODAL INTERNALS ===== */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .detail-item .di-label { font-size: 11px; color: var(--text-muted); font-weight: 500; margin-bottom: 3px; }
+  .detail-item .di-val { font-size: 13px; color: var(--text-primary); font-weight: 500; }
+  .detail-memo { background: var(--surface-0); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+
+  /* ===== EMPTY STATE ===== */
+  .empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+  .empty i { font-size: 40px; display: block; margin-bottom: 10px; opacity: .5; }
+  .empty p { font-size: 13px; line-height: 1.7; }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+
+  /* ===== TOOLTIP / tiny helpers ===== */
+  .text-muted { color: var(--text-muted); }
+  .mt-4 { margin-top: 4px; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mb-16 { margin-bottom: 16px; }
+
+  /* ===== WEEKLY REPORT ===== */
+  .week-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .week-selector label { font-size: 12px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
+  .week-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .week-tab {
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border-strong);
+    background: var(--surface-1);
+    color: var(--text-secondary);
+    transition: all .12s;
+    white-space: nowrap;
+  }
+  .week-tab:hover { background: var(--surface-0); color: var(--text-primary); }
+  .week-tab.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+  .report-header {
+    background: var(--brand);
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .report-header-left h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .report-header-left p  { font-size: 13px; opacity: .8; }
+  .report-header-right { display: flex; gap: 8px; }
+
+  .parts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .part-card {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .part-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-0);
+  }
+  .part-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .part-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .part-card-body { padding: 14px 16px; }
+  .part-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .part-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .part-item-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--surface-0);
+    border: 1px solid var(--border);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .part-item-text { flex: 1; color: var(--text-primary); line-height: 1.5; }
+  .part-item-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .part-add-btn {
+    width: 100%;
+    padding: 8px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius);
+    background: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 10px;
+    transition: all .12s;
+  }
+  .part-add-btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+
+  /* 보고서 인쇄/공유 뷰 */
+  .report-print-wrap { display: none; }
+  @media print {
+    .sidebar, .topbar, .week-selector, .report-header-right, .part-add-btn, .btn-secondary, .no-print { display: none !important; }
+    .app { display: block; }
+    .main { overflow: visible; }
+    .content { padding: 0; }
+    .report-print-wrap { display: block; }
+    .parts-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* 공유 링크 배너 */
+  .share-bar {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #0369a1;
+    margin-bottom: 16px;
+  }
+  .share-bar i { font-size: 15px; flex-shrink: 0; }
+  .share-url {
+    flex: 1;
+    font-family: monospace;
+    font-size: 11px;
+    background: #fff;
+    border: 1px solid #bae6fd;
+    border-radius: 4px;
+    padding: 4px 8px;
+    color: #1e40af;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* 아이템 삭제 버튼 */
+  .part-item-del {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 13px;
+    padding: 2px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity .12s;
+    flex-shrink: 0;
+  }
+  .part-item:hover .part-item-del { opacity: 1; }
+  .part-item-del:hover { color: var(--red); background: var(--red-bg); }
+
+  /* ===== LOG IMPORT PANEL ===== */
+  .import-panel {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .import-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #f0f9ff;
+    border-bottom: 1px solid #bae6fd;
+    cursor: pointer;
+    user-select: none;
+  }
+  .import-panel-head:hover { background: #e0f2fe; }
+  .import-panel-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #0369a1;
+  }
+  .import-panel-title i { font-size: 16px; }
+  .import-panel-body { padding: 0; }
+  .import-panel-body.collapsed { display: none; }
+
+  .import-filters {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-0);
+    flex-wrap: wrap;
+  }
+  .import-filters label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+  .import-filters select,
+  .import-filters input[type=date] {
+    padding: 5px 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: #fff;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .import-log-list { max-height: 320px; overflow-y: auto; }
+  .import-log-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    transition: background .1s;
+    cursor: pointer;
+  }
+  .import-log-item:last-child { border-bottom: none; }
+  .import-log-item:hover { background: #f0f9ff; }
+  .import-log-item.selected { background: #EBF3FD; }
+  .import-log-item input[type=checkbox] { margin-top: 3px; accent-color: var(--brand); flex-shrink: 0; width: 15px; height: 15px; cursor: pointer; }
+  .import-log-item-body { flex: 1; min-width: 0; }
+  .import-log-item-row1 { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 2px; }
+  .import-log-item-bld { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .import-log-item-date { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+  .import-log-item-content { font-size: 12px; color: var(--text-secondary); line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .import-log-item.already { opacity: .45; cursor: default; pointer-events: none; }
+  .import-log-item.already::after { content: '이미 추가됨'; font-size: 10px; color: var(--text-muted); }
+
+  .import-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-0);
+  }
+  .import-footer-info { font-size: 12px; color: var(--text-muted); }
+  .import-part-assign {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .import-part-assign label { font-size: 12px; color: var(--text-secondary); }
+  .import-part-assign select { padding: 5px 8px; border: 1px solid var(--border-strong); border-radius: var(--radius); font-size: 12px; background: #fff; }
+
+  /* ===== SUPABASE PLACEHOLDER COMMENT ===== */
+  /*
+  ==============================================
+  [TODO] Supabase 연동 시 이 파일에서 수정할 부분
+  ==============================================
+  1. <head> 에 supabase-js CDN 추가:
+     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  2. 아래 DB 설정 섹션에서 URL/KEY 입력 후 주석 해제
+
+  3. save() 함수 → supabase.from('buildings').upsert(...) 등으로 교체
+     load() 함수 → supabase.from('buildings').select('*') 등으로 교체
+
+  4. 필요 테이블:
+     buildings (id, name, addr, type, area, owner, phone, email, next_date, memo, created_at)
+     contact_logs (id, building_id, type, date, staff, content, next_date, created_at)
+  ==============================================
+  */
+</style>
+</head>
+<body>
+
+<!-- ===================== APP SHELL ===================== -->
+<div class="app">
+
+  <!-- ---- SIDEBAR ---- -->
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-brand">🏢 둥지 CRM</div>
+      <div class="logo-sub">영업팀 고객관리 시스템</div>
+    </div>
+    <a class="back-to-launcher" href="./index.html">
+      <i class="ti ti-arrow-left"></i>메인 메뉴로
+    </a>
+    <div class="nav-section">메뉴</div>
+    <button class="nav-item active" data-page="overview"><i class="ti ti-layout-dashboard"></i>대시보드</button>
+    <button class="nav-item" data-page="buildings"><i class="ti ti-building"></i>건물 관리</button>
+    <button class="nav-item" data-page="owners"><i class="ti ti-users"></i>임대인 관리</button>
+    <button class="nav-item" data-page="calendar"><i class="ti ti-calendar"></i>미팅 캘린더</button>
+    <button class="nav-item" data-page="logs"><i class="ti ti-clipboard-list"></i>소통 기록</button>
+    <div class="nav-section" style="margin-top:8px">보고</div>
+    <button class="nav-item" data-page="weekly"><i class="ti ti-file-report"></i>주간 미팅 보고</button>
+  </nav>
+
+  <!-- ---- MAIN ---- -->
+  <div class="main">
+
+    <!-- topbar -->
+    <div class="topbar">
+      <span class="topbar-title" id="page-title">대시보드</span>
+      <div class="topbar-actions" id="topbar-actions">
+        <button class="btn btn-secondary" id="btn-log" onclick="openLogModal()" style="display:none"><i class="ti ti-phone"></i>기록 추가</button>
+        <button class="btn btn-secondary" id="btn-share-report" onclick="copyReportLink()" style="display:none"><i class="ti ti-link"></i>링크 복사</button>
+        <button class="btn btn-secondary" id="btn-print-report" onclick="window.print()" style="display:none"><i class="ti ti-printer"></i>인쇄</button>
+        <button class="btn btn-primary" id="btn-add-report-item" onclick="openReportItemModal()" style="display:none"><i class="ti ti-plus"></i>항목 추가</button>
+        <button class="btn btn-primary" id="btn-building" onclick="openBuildingModal()"><i class="ti ti-plus"></i>건물 추가</button>
+      </div>
+    </div>
+
+    <!-- content -->
+    <div class="content">
+
+      <!-- ===== 대시보드 ===== -->
+      <div class="page active" id="page-overview">
+        <div class="stats-grid" id="stats-grid"></div>
+        <div id="alert-zone"></div>
+        <div class="section-hd"><h2>최근 소통 기록</h2></div>
+        <div class="table-wrap">
+          <div class="log-feed" id="recent-log-feed" style="padding: 0 16px;"></div>
+        </div>
+      </div>
+
+      <!-- ===== 건물 관리 ===== -->
+      <div class="page" id="page-buildings">
+        <div class="building-grid" id="building-grid"></div>
+      </div>
+
+      <!-- ===== 임대인 관리 ===== -->
+      <div class="page" id="page-owners">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>임대인</th>
+                <th>건물명</th>
+                <th>연락처</th>
+                <th>이메일</th>
+                <th>마지막 대면·유선</th>
+                <th>다음 예정일</th>
+                <th>상태</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="owner-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== 캘린더 ===== -->
+      <div class="page" id="page-calendar">
+        <div class="cal-nav-bar">
+          <button class="cal-nav-btn" id="prev-month"><i class="ti ti-chevron-left"></i></button>
+          <span class="cal-title" id="cal-label"></span>
+          <button class="cal-nav-btn" id="next-month"><i class="ti ti-chevron-right"></i></button>
+          <div class="cal-legend">
+            <span><span class="cal-legend-dot" style="background:#EBF3FD;border:1.5px solid #3B8CE4;"></span>대면</span>
+            <span><span class="cal-legend-dot" style="background:#f0fdf4;border:1.5px solid #16a34a;"></span>유선</span>
+            <span><span class="cal-legend-dot" style="background:#faf5ff;border:1.5px solid #7c3aed;"></span>이메일</span>
+            <span><span class="cal-legend-dot" style="background:#fffbeb;border:1.5px solid #d97706;"></span>카톡</span>
+            <span><span class="cal-legend-dot" style="background:#fef2f2;border:1.5px solid #dc2626;"></span>문자</span>
+          </div>
+        </div>
+        <div class="cal-grid-wrap">
+          <div class="cal-dow-row">
+            <div class="cal-dow">일</div><div class="cal-dow">월</div><div class="cal-dow">화</div>
+            <div class="cal-dow">수</div><div class="cal-dow">목</div><div class="cal-dow">금</div><div class="cal-dow">토</div>
+          </div>
+          <div class="cal-days" id="cal-days"></div>
+        </div>
+      </div>
+
+      <!-- ===== 소통 기록 ===== -->
+      <div class="page" id="page-logs">
+        <div class="filter-bar">
+          <select id="filter-type" onchange="renderLogPage()">
+            <option value="">전체 유형</option>
+            <option value="meet">대면 미팅</option>
+            <option value="call">유선 통화</option>
+            <option value="email">이메일</option>
+            <option value="kakao">카카오톡</option>
+            <option value="sms">문자</option>
+          </select>
+          <select id="filter-bld" onchange="renderLogPage()">
+            <option value="">전체 건물</option>
+          </select>
+          <select id="filter-month" onchange="renderLogPage()">
+            <option value="">전체 기간</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <div class="log-feed" id="log-feed" style="padding: 0 16px;"></div>
+        </div>
+      </div>
+
+      <!-- ===== 주간 미팅 보고 ===== -->
+      <div class="page" id="page-weekly">
+
+        <!-- 주차 선택 -->
+        <div class="week-selector">
+          <label><i class="ti ti-calendar-week" style="font-size:15px;vertical-align:-2px;margin-right:4px"></i>보고 주차</label>
+          <div class="week-tabs" id="week-tabs"></div>
+          <input type="date" class="f-input" id="week-date-pick" style="width:150px;padding:6px 10px;font-size:12px" title="날짜 직접 선택">
+          <button class="btn btn-secondary btn-sm" onclick="addWeekFromDate()"><i class="ti ti-plus"></i>주차 추가</button>
+        </div>
+
+        <!-- 공유 링크 배너 -->
+        <div class="share-bar" id="share-bar" style="display:none">
+          <i class="ti ti-link"></i>
+          <span>이 주간 보고 전용 링크:</span>
+          <span class="share-url" id="share-url-text"></span>
+          <button class="btn btn-secondary btn-sm" onclick="copyReportLink()"><i class="ti ti-copy"></i>복사</button>
+        </div>
+
+        <!-- 소통 기록 불러오기 패널 -->
+        <div class="import-panel no-print" id="import-panel" style="display:none">
+          <div class="import-panel-head" onclick="toggleImportPanel()">
+            <div class="import-panel-title">
+              <i class="ti ti-database-import"></i>
+              소통 기록에서 불러오기
+              <span class="badge badge-blue" id="import-week-label" style="font-weight:400"></span>
+            </div>
+            <i class="ti ti-chevron-up" id="import-chevron" style="font-size:16px;color:#0369a1"></i>
+          </div>
+          <div class="import-panel-body" id="import-panel-body">
+            <div class="import-filters">
+              <label>기간</label>
+              <select id="imp-range" onchange="renderImportList()">
+                <option value="week">이번 주</option>
+                <option value="2week">최근 2주</option>
+                <option value="month">최근 1개월</option>
+                <option value="custom">직접 설정</option>
+              </select>
+              <span id="imp-custom-dates" style="display:none;gap:6px;align-items:center;display:none">
+                <input type="date" id="imp-from" onchange="renderImportList()">
+                <span style="color:var(--text-muted)">~</span>
+                <input type="date" id="imp-to" onchange="renderImportList()">
+              </span>
+              <label style="margin-left:8px">유형</label>
+              <select id="imp-type" onchange="renderImportList()">
+                <option value="">전체</option>
+                <option value="meet">대면 미팅</option>
+                <option value="call">유선 통화</option>
+                <option value="email">이메일</option>
+                <option value="kakao">카카오톡</option>
+                <option value="sms">문자</option>
+              </select>
+              <label style="margin-left:8px">건물</label>
+              <select id="imp-bld" onchange="renderImportList()">
+                <option value="">전체</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" style="margin-left:auto" onclick="toggleSelectAll()">전체 선택</button>
+            </div>
+            <div class="import-log-list" id="import-log-list"></div>
+            <div class="import-footer">
+              <span class="import-footer-info" id="import-selected-info">선택된 항목 없음</span>
+              <div class="import-part-assign">
+                <label>파트 지정</label>
+                <select id="imp-part"></select>
+                <button class="btn btn-primary btn-sm" onclick="importSelectedLogs()">
+                  <i class="ti ti-download"></i> 보고서에 추가
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 보고서 본문 -->
+        <div id="weekly-report-body"></div>
+
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+
+<!-- ===================== MODAL: 건물 추가/편집 ===================== -->
+<div class="modal-overlay" id="modal-building">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="building-modal-title">건물 추가</span>
+      <button class="modal-close" onclick="closeModal('modal-building')"><i class="ti ti-x"></i></button>
+    </div>
+
+    <div class="form-section-label">건물 정보</div>
+    <div class="form-row">
+      <label class="f-label">건물명 <span class="req">*</span></label>
+      <input class="f-input" id="b-name" placeholder="예: 강남 스타빌딩">
+    </div>
+    <div class="form-row">
+      <label class="f-label">주소 <span class="req">*</span></label>
+      <input class="f-input" id="b-addr" placeholder="서울시 강남구 테헤란로 123">
+    </div>
+    <div class="form-row-3">
+      <div>
+        <label class="f-label">건물 용도</label>
+        <select class="f-input" id="b-type">
+          <option>오피스</option><option>상가</option><option>주거</option>
+          <option>복합</option><option>물류</option><option>기타</option>
+        </select>
+      </div>
+      <div>
+        <label class="f-label">연면적 (평)</label>
+        <input class="f-input" id="b-area" type="number" placeholder="500">
+      </div>
+      <div>
+        <label class="f-label">층수</label>
+        <input class="f-input" id="b-floors" placeholder="B2/10F">
+      </div>
+    </div>
+
+    <hr class="form-divider">
+    <div class="form-section-label">임대인 정보</div>
+    <div class="form-row">
+      <label class="f-label">임대인 이름 <span class="req">*</span></label>
+      <input class="f-input" id="b-owner" placeholder="홍길동">
+    </div>
+    <div class="form-row-2">
+      <div>
+        <label class="f-label">연락처</label>
+        <input class="f-input" id="b-phone" placeholder="010-0000-0000">
+      </div>
+      <div>
+        <label class="f-label">이메일</label>
+        <input class="f-input" id="b-email" placeholder="owner@email.com">
+      </div>
+    </div>
+
+    <hr class="form-divider">
+    <div class="form-section-label">일정</div>
+    <div class="form-row-2">
+      <div>
+        <label class="f-label">계약 시작일</label>
+        <input class="f-input" id="b-contract-start" type="date">
+      </div>
+      <div>
+        <label class="f-label">다음 미팅 예정일</label>
+        <input class="f-input" id="b-next" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="f-label">메모</label>
+      <textarea class="f-input" id="b-memo" rows="3" placeholder="계약 조건, 특이사항 등 자유롭게 기록하세요"></textarea>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-building')">취소</button>
+      <button class="btn btn-primary" onclick="saveBuilding()"><i class="ti ti-check"></i>저장</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== MODAL: 소통 기록 추가 ===================== -->
+<div class="modal-overlay" id="modal-log">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">소통 기록 추가</span>
+      <button class="modal-close" onclick="closeModal('modal-log')"><i class="ti ti-x"></i></button>
+    </div>
+
+    <div class="form-row">
+      <label class="f-label">건물 <span class="req">*</span></label>
+      <select class="f-input" id="l-bld"></select>
+    </div>
+    <div class="form-row-2">
+      <div>
+        <label class="f-label">소통 유형 <span class="req">*</span></label>
+        <select class="f-input" id="l-type">
+          <option value="meet">① 대면 미팅</option>
+          <option value="call">② 유선 통화</option>
+          <option value="email">③ 이메일</option>
+          <option value="kakao">④ 카카오톡</option>
+          <option value="sms">⑤ 문자</option>
+        </select>
+      </div>
+      <div>
+        <label class="f-label">일자 <span class="req">*</span></label>
+        <input class="f-input" id="l-date" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="f-label">담당자</label>
+      <input class="f-input" id="l-staff" placeholder="소통 진행 담당자 이름">
+    </div>
+    <div class="form-row">
+      <label class="f-label">주요 내용</label>
+      <textarea class="f-input" id="l-content" rows="4" placeholder="미팅 또는 통화 내용을 간략히 기록하세요&#10;&#10;예) 건물 에너지 절감 방안 논의, FM 계약 갱신 협의 등"></textarea>
+    </div>
+    <div class="form-row">
+      <label class="f-label">다음 소통 예정일</label>
+      <input class="f-input" id="l-next" type="date">
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-log')">취소</button>
+      <button class="btn btn-primary" onclick="saveLog()"><i class="ti ti-check"></i>저장</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ===================== MODAL: 건물 상세 ===================== -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal" style="width:560px">
+    <div id="detail-body"></div>
+  </div>
+</div>
+
+
+<!-- ===================== MODAL: 주간 보고 항목 추가 ===================== -->
+<div class="modal-overlay" id="modal-report-item">
+  <div class="modal" style="width:480px">
+    <div class="modal-header">
+      <span class="modal-title">보고 항목 추가</span>
+      <button class="modal-close" onclick="closeModal('modal-report-item')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-row">
+      <label class="f-label">파트 <span class="req">*</span></label>
+      <select class="f-input" id="ri-part"></select>
+    </div>
+    <div class="form-row">
+      <label class="f-label">내용 <span class="req">*</span></label>
+      <textarea class="f-input" id="ri-content" rows="3" placeholder="보고할 내용을 입력하세요&#10;예) 강남빌딩 FM 계약 갱신 협의 완료, 다음 주 계약서 수령 예정"></textarea>
+    </div>
+    <div class="form-row-2">
+      <div>
+        <label class="f-label">담당자</label>
+        <input class="f-input" id="ri-person" placeholder="홍길동">
+      </div>
+      <div>
+        <label class="f-label">상태</label>
+        <select class="f-input" id="ri-status">
+          <option value="normal">일반</option>
+          <option value="done">완료</option>
+          <option value="issue">이슈</option>
+          <option value="pending">보류</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="f-label">관련 건물</label>
+      <select class="f-input" id="ri-bld">
+        <option value="">— 선택 안 함 —</option>
+      </select>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-report-item')">취소</button>
+      <button class="btn btn-primary" onclick="saveReportItem()"><i class="ti ti-check"></i>저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL: 파트 관리 ===================== -->
+<div class="modal-overlay" id="modal-parts">
+  <div class="modal" style="width:420px">
+    <div class="modal-header">
+      <span class="modal-title">파트 관리</span>
+      <button class="modal-close" onclick="closeModal('modal-parts')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="parts-list-edit" style="margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px">
+      <input class="f-input" id="new-part-name" placeholder="새 파트명 (예: 영업팀)" style="flex:1">
+      <input class="f-input" id="new-part-color" type="color" value="#3B8CE4" style="width:44px;padding:4px;cursor:pointer">
+      <button class="btn btn-primary btn-sm" onclick="addPart()"><i class="ti ti-plus"></i>추가</button>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="closeModal('modal-parts');renderWeekly()">완료</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== SCRIPTS ===================== -->
+<script>
+/* ============================================================
+   [SUPABASE 연동 준비]
+   아래 주석을 해제하고 URL / ANON_KEY 를 입력하면 됩니다.
+   현재는 localStorage 로 동작합니다.
+   ============================================================ */
+// const SUPABASE_URL  = 'https://xxxx.supabase.co';
+// const SUPABASE_KEY  = 'your-anon-key';
+// const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ============================================================
+   DATA LAYER — localStorage (Supabase 전환 시 이 함수들만 교체)
+   ============================================================ */
+let buildings    = [];
+let logs         = [];
+let weeklyParts  = [];   // [{id, name, color}]
+let weeklyItems  = [];   // [{id, weekKey, partId, content, person, status, bldId, order}]
+let weeklyWeeks  = [];   // ['2025-07-07', ...] 월요일 날짜 문자열 목록
+
+function persistSave() {
+  localStorage.setItem('doongji_crm_buildings',    JSON.stringify(buildings));
+  localStorage.setItem('doongji_crm_logs',         JSON.stringify(logs));
+  localStorage.setItem('doongji_crm_weekly_parts', JSON.stringify(weeklyParts));
+  localStorage.setItem('doongji_crm_weekly_items', JSON.stringify(weeklyItems));
+  localStorage.setItem('doongji_crm_weekly_weeks', JSON.stringify(weeklyWeeks));
+}
+
+function persistLoad() {
+  try { buildings   = JSON.parse(localStorage.getItem('doongji_crm_buildings')    || '[]'); } catch(e) { buildings = []; }
+  try { logs        = JSON.parse(localStorage.getItem('doongji_crm_logs')         || '[]'); } catch(e) { logs = []; }
+  try { weeklyParts = JSON.parse(localStorage.getItem('doongji_crm_weekly_parts') || '[]'); } catch(e) { weeklyParts = []; }
+  try { weeklyItems = JSON.parse(localStorage.getItem('doongji_crm_weekly_items') || '[]'); } catch(e) { weeklyItems = []; }
+  try { weeklyWeeks = JSON.parse(localStorage.getItem('doongji_crm_weekly_weeks') || '[]'); } catch(e) { weeklyWeeks = []; }
+
+  // 기본 파트 세팅 (최초 실행 시)
+  if (!weeklyParts.length) {
+    weeklyParts = [
+      { id: 1, name: '영업팀',   color: '#3B8CE4' },
+      { id: 2, name: '시설관리', color: '#16a34a' },
+      { id: 3, name: '미화용역', color: '#d97706' },
+      { id: 4, name: '중개법인', color: '#7c3aed' },
+      { id: 5, name: '시공팀',   color: '#dc2626' },
+    ];
+  }
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const todayStr = () => new Date().toISOString().split('T')[0];
+
+function daysBetween(d1, d2) {
+  return Math.round((new Date(d2) - new Date(d1)) / 86400000);
+}
+
+// 유형별 기한 설정 (일 단위) — 대면: 90일(3개월), 유선: 60일(2개월), 나머지: 기한 없음
+const TYPE_DEADLINE = { meet: 90, call: 60 };
+
+// 건물의 "기한 관리 대상" 소통(대면+유선)만 기준으로 상태 판단
+function buildingStatus(b) {
+  const targetLogs = logs
+    .filter(l => l.bldId === b.id && (l.type === 'meet' || l.type === 'call'))
+    .sort((a, c) => c.date.localeCompare(a.date));
+
+  if (!targetLogs.length) return 'new';
+
+  // 가장 최근 대면 / 가장 최근 유선을 각각 체크
+  const lastMeet = logs.filter(l => l.bldId === b.id && l.type === 'meet').sort((a,c) => c.date.localeCompare(a.date))[0];
+  const lastCall = logs.filter(l => l.bldId === b.id && l.type === 'call').sort((a,c) => c.date.localeCompare(a.date))[0];
+
+  const meetDiff = lastMeet ? daysBetween(lastMeet.date, todayStr()) : Infinity;
+  const callDiff = lastCall ? daysBetween(lastCall.date, todayStr()) : Infinity;
+
+  // 대면 기한(90일) 초과 OR 유선 기한(60일) 초과
+  if (meetDiff > 90 || callDiff > 60) return 'overdue';
+  // 대면 75일 이상 OR 유선 45일 이상 → 곧 필요
+  if (meetDiff > 75 || callDiff > 45) return 'soon';
+  return 'ok';
+}
+
+// 건물 상태 상세 툴팁용 텍스트
+function buildingStatusDetail(b) {
+  const lastMeet = logs.filter(l => l.bldId === b.id && l.type === 'meet').sort((a,c) => c.date.localeCompare(a.date))[0];
+  const lastCall = logs.filter(l => l.bldId === b.id && l.type === 'call').sort((a,c) => c.date.localeCompare(a.date))[0];
+  const parts = [];
+  if (lastMeet) parts.push(`대면: ${daysBetween(lastMeet.date, todayStr())}일 전 (기한 90일)`);
+  else parts.push('대면: 기록 없음 (기한 90일)');
+  if (lastCall) parts.push(`유선: ${daysBetween(lastCall.date, todayStr())}일 전 (기한 60일)`);
+  else parts.push('유선: 기록 없음 (기한 60일)');
+  return parts.join(' · ');
+}
+
+function lastContactDate(b) {
+  const bLogs = logs.filter(l => l.bldId === b.id).sort((a, c) => c.date.localeCompare(a.date));
+  return bLogs.length ? bLogs[0].date : null;
+}
+
+const STATUS_MAP = {
+  new:     ['badge-blue',  '신규'],
+  ok:      ['badge-green', '정상'],
+  soon:    ['badge-amber', '연락 필요'],
+  overdue: ['badge-red',   '기한 초과'],
+};
+
+function statusBadge(s) {
+  const [cls, txt] = STATUS_MAP[s] || STATUS_MAP.ok;
+  return `<span class="badge ${cls}">${txt}</span>`;
+}
+
+const TYPE_META = {
+  meet:  { label: '대면 미팅', icon: 'ti-users',        badge: 'badge-blue',   iconClass: 'meet'  },
+  call:  { label: '유선 통화', icon: 'ti-phone',         badge: 'badge-green',  iconClass: 'call'  },
+  email: { label: '이메일',    icon: 'ti-mail',          badge: 'badge-purple', iconClass: 'email' },
+  kakao: { label: '카카오톡',  icon: 'ti-brand-kakao',   badge: 'badge-amber',  iconClass: 'kakao' },
+  sms:   { label: '문자',      icon: 'ti-message',       badge: 'badge-red',    iconClass: 'sms'   },
+};
+
+function typeBadge(type) {
+  const m = TYPE_META[type] || TYPE_META.call;
+  return `<span class="badge ${m.badge}"><i class="ti ${m.icon}" style="font-size:10px"></i>${m.label}</span>`;
+}
+
+function typeIcon(type) {
+  return (TYPE_META[type] || TYPE_META.call).icon;
+}
+
+function bName(id) {
+  const b = buildings.find(x => x.id === id);
+  return b ? b.name : '(삭제된 건물)';
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// 배경 클릭으로 닫기
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ESC 닫기
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+/* ---- 건물 추가 모달 ---- */
+let editBuildingId = null;
+
+function openBuildingModal(id = null) {
+  editBuildingId = id;
+  const fields = ['b-name','b-addr','b-type','b-area','b-floors','b-owner','b-phone','b-email','b-contract-start','b-next','b-memo'];
+  fields.forEach(f => { const el = document.getElementById(f); if (el) el.value = ''; });
+
+  if (id) {
+    const b = buildings.find(x => x.id === id);
+    if (!b) return;
+    document.getElementById('building-modal-title').textContent = '건물 정보 수정';
+    document.getElementById('b-name').value  = b.name  || '';
+    document.getElementById('b-addr').value  = b.addr  || '';
+    document.getElementById('b-type').value  = b.type  || '오피스';
+    document.getElementById('b-area').value  = b.area  || '';
+    document.getElementById('b-floors').value = b.floors || '';
+    document.getElementById('b-owner').value = b.owner || '';
+    document.getElementById('b-phone').value = b.phone || '';
+    document.getElementById('b-email').value = b.email || '';
+    document.getElementById('b-contract-start').value = b.contractStart || '';
+    document.getElementById('b-next').value  = b.next  || '';
+    document.getElementById('b-memo').value  = b.memo  || '';
+  } else {
+    document.getElementById('building-modal-title').textContent = '건물 추가';
+  }
+
+  closeModal('modal-detail');
+  openModal('modal-building');
+}
+
+function saveBuilding() {
+  const name  = document.getElementById('b-name').value.trim();
+  const addr  = document.getElementById('b-addr').value.trim();
+  const owner = document.getElementById('b-owner').value.trim();
+  if (!name || !addr || !owner) { alert('건물명, 주소, 임대인 이름은 필수입니다.'); return; }
+
+  const data = {
+    name, addr, owner,
+    type:          document.getElementById('b-type').value,
+    area:          document.getElementById('b-area').value,
+    floors:        document.getElementById('b-floors').value.trim(),
+    phone:         document.getElementById('b-phone').value.trim(),
+    email:         document.getElementById('b-email').value.trim(),
+    contractStart: document.getElementById('b-contract-start').value,
+    next:          document.getElementById('b-next').value,
+    memo:          document.getElementById('b-memo').value.trim(),
+  };
+
+  if (editBuildingId) {
+    const idx = buildings.findIndex(x => x.id === editBuildingId);
+    if (idx >= 0) buildings[idx] = { ...buildings[idx], ...data };
+  } else {
+    buildings.push({ id: Date.now(), ...data, created: todayStr() });
+  }
+
+  persistSave();
+  closeModal('modal-building');
+  renderAll();
+}
+
+/* ---- 소통 기록 모달 ---- */
+function openLogModal(bldId = null) {
+  document.getElementById('l-bld').innerHTML = buildings
+    .map(b => `<option value="${b.id}">${b.name} (${b.owner})</option>`).join('');
+  if (bldId) document.getElementById('l-bld').value = bldId;
+  document.getElementById('l-date').value = todayStr();
+  document.getElementById('l-staff').value = '';
+  document.getElementById('l-content').value = '';
+  document.getElementById('l-next').value = '';
+  openModal('modal-log');
+}
+
+function saveLog() {
+  const bldId = parseInt(document.getElementById('l-bld').value);
+  const date  = document.getElementById('l-date').value;
+  const type  = document.getElementById('l-type').value;
+  if (!bldId || !date) { alert('건물과 일자는 필수입니다.'); return; }
+
+  const log = {
+    id:      Date.now(),
+    bldId,
+    type,
+    date,
+    staff:   document.getElementById('l-staff').value.trim(),
+    content: document.getElementById('l-content').value.trim(),
+    next:    document.getElementById('l-next').value,
+  };
+
+  logs.push(log);
+
+  // 다음 예정일 있으면 건물에도 업데이트
+  if (log.next) {
+    const b = buildings.find(x => x.id === bldId);
+    if (b) b.next = log.next;
+  }
+
+  persistSave();
+  closeModal('modal-log');
+  renderAll();
+}
+
+/* ---- 건물 상세 모달 ---- */
+function openDetailModal(id) {
+  const b = buildings.find(x => x.id === id);
+  if (!b) return;
+
+  const bLogs = logs.filter(l => l.bldId === b.id).sort((a, c) => c.date.localeCompare(a.date));
+  const status = buildingStatus(b);
+
+  document.getElementById('detail-body').innerHTML = `
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">${b.name}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px">${b.addr}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px">${buildingStatusDetail(b)}</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        ${statusBadge(status)}
+        <button class="modal-close" onclick="closeModal('modal-detail')"><i class="ti ti-x"></i></button>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div class="detail-item"><div class="di-label">임대인</div><div class="di-val">${b.owner}</div></div>
+      <div class="detail-item"><div class="di-label">연락처</div><div class="di-val">${b.phone || '-'}</div></div>
+      <div class="detail-item"><div class="di-label">이메일</div><div class="di-val" style="font-size:12px">${b.email || '-'}</div></div>
+      <div class="detail-item"><div class="di-label">용도 / 면적</div><div class="di-val">${b.type || '-'}${b.area ? ' · ' + b.area + '평' : ''}${b.floors ? ' · ' + b.floors : ''}</div></div>
+      <div class="detail-item"><div class="di-label">계약 시작</div><div class="di-val">${b.contractStart || '-'}</div></div>
+      <div class="detail-item"><div class="di-label">다음 예정일</div><div class="di-val">${b.next || '-'}</div></div>
+    </div>
+
+    ${b.memo ? `<div class="detail-memo">${b.memo.replace(/\n/g,'<br>')}</div>` : ''}
+
+    <div class="section-hd">
+      <h2>소통 기록 (${bLogs.length}건)</h2>
+    </div>
+
+    <div class="log-feed" style="max-height:240px;overflow-y:auto">
+      ${bLogs.length ? bLogs.map(l => logItemHTML(l, false)).join('') : '<div class="empty" style="padding:24px 0"><i class="ti ti-clipboard" style="font-size:28px"></i><p>소통 기록이 없습니다.</p></div>'}
+    </div>
+
+    <div class="form-actions" style="margin-top:16px">
+      <button class="btn btn-danger btn-sm" onclick="deleteBuilding(${b.id})"><i class="ti ti-trash"></i>삭제</button>
+      <button class="btn btn-secondary btn-sm" onclick="openBuildingModal(${b.id})"><i class="ti ti-edit"></i>수정</button>
+      <button class="btn btn-primary btn-sm" onclick="closeModal('modal-detail');openLogModal(${b.id})"><i class="ti ti-plus"></i>기록 추가</button>
+    </div>
+  `;
+  openModal('modal-detail');
+}
+
+function deleteBuilding(id) {
+  if (!confirm('이 건물 및 관련 소통 기록을 모두 삭제하시겠습니까?')) return;
+  buildings = buildings.filter(b => b.id !== id);
+  logs      = logs.filter(l => l.bldId !== id);
+  persistSave();
+  closeModal('modal-detail');
+  renderAll();
+}
+
+function deleteLog(id) {
+  if (!confirm('이 소통 기록을 삭제하시겠습니까?')) return;
+  logs = logs.filter(l => l.id !== id);
+  persistSave();
+  renderAll();
+}
+
+/* ============================================================
+   LOG ITEM HTML
+   ============================================================ */
+function logItemHTML(l, showDelete = true) {
+  return `
+    <div class="log-item">
+      <div class="log-icon ${l.type}"><i class="ti ${typeIcon(l.type)}"></i></div>
+      <div class="log-body">
+        <div class="log-row1">
+          <span class="log-bld">${bName(l.bldId)}</span>
+          ${typeBadge(l.type)}
+          <span class="log-date">${l.date}${l.staff ? ' · ' + l.staff : ''}</span>
+        </div>
+        <div class="log-content">${l.content || '<span style="color:var(--text-muted)">내용 없음</span>'}</div>
+        ${l.next ? `<div class="log-next"><i class="ti ti-calendar-event"></i>다음 예정: ${l.next}</div>` : ''}
+      </div>
+      ${showDelete ? `<button class="btn btn-secondary btn-sm" onclick="deleteLog(${l.id})" title="삭제"><i class="ti ti-trash"></i></button>` : ''}
+    </div>
+  `;
+}
+
+/* ============================================================
+   RENDER FUNCTIONS
+   ============================================================ */
+
+/* -- 대시보드 -- */
+function renderOverview() {
+  const total   = buildings.length;
+  const overdue = buildings.filter(b => buildingStatus(b) === 'overdue').length;
+  const soon    = buildings.filter(b => buildingStatus(b) === 'soon').length;
+  const thisM   = logs.filter(l => l.date.startsWith(todayStr().slice(0, 7))).length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">전체 관리 건물</div><div class="stat-value c-blue">${total}</div><div class="stat-sub">등록된 임대인 건물</div></div>
+    <div class="stat-card"><div class="stat-label">이번 달 소통</div><div class="stat-value c-green">${thisM}</div><div class="stat-sub">전체 유형 합계</div></div>
+    <div class="stat-card"><div class="stat-label">연락 필요</div><div class="stat-value c-amber">${soon}</div><div class="stat-sub">대면 75일↑ / 유선 45일↑</div></div>
+    <div class="stat-card"><div class="stat-label">기한 초과</div><div class="stat-value c-red">${overdue}</div><div class="stat-sub">대면 90일↑ / 유선 60일↑</div></div>
+  `;
+
+  const alertZone = document.getElementById('alert-zone');
+  const overdueList = buildings.filter(b => buildingStatus(b) === 'overdue');
+  alertZone.innerHTML = overdueList.length
+    ? `<div class="alert alert-warning"><i class="ti ti-alert-triangle"></i><div><strong>${overdueList.length}개 건물</strong> 소통 기한 초과 (대면 3개월·유선 2개월 기준): ${overdueList.map(b => b.name).join(', ')}</div></div>`
+    : '';
+
+  const sorted = logs.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 6);
+  const feed = document.getElementById('recent-log-feed');
+  feed.innerHTML = sorted.length
+    ? sorted.map(l => logItemHTML(l, false)).join('')
+    : '<div class="empty"><i class="ti ti-clipboard"></i><p>소통 기록이 없습니다.<br>건물을 추가한 뒤 첫 기록을 남겨보세요.</p></div>';
+}
+
+/* -- 건물 관리 -- */
+function renderBuildings() {
+  const el = document.getElementById('building-grid');
+  if (!buildings.length) {
+    el.innerHTML = '<div class="empty" style="grid-column:1/-1"><i class="ti ti-building-off"></i><p>등록된 건물이 없습니다.<br>우측 상단 버튼으로 건물을 추가해 주세요.</p></div>';
+    return;
+  }
+  el.innerHTML = buildings.map(b => {
+    const s = buildingStatus(b);
+    const last = lastContactDate(b);
+    return `
+      <div class="bcard" onclick="openDetailModal(${b.id})">
+        <div class="bcard-name">${b.name}</div>
+        <div class="bcard-addr">${b.addr}</div>
+        <div class="bcard-owner"><i class="ti ti-user"></i>${b.owner}${b.type ? ' · ' + b.type : ''}</div>
+        <div class="bcard-foot">
+          <span title="${buildingStatusDetail(b)}">${statusBadge(s)}</span>
+          ${b.next ? `<div class="bcard-next"><i class="ti ti-calendar"></i>${b.next}</div>` : ''}
+        </div>
+        ${last ? `<div class="bcard-next mt-4"><i class="ti ti-clock"></i>마지막: ${last}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+/* -- 임대인 관리 -- */
+function renderOwners() {
+  const tbody = document.getElementById('owner-tbody');
+  if (!buildings.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">등록된 임대인이 없습니다.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = buildings.map(b => {
+    const s = buildingStatus(b);
+    const last = lastContactDate(b);
+    return `
+      <tr>
+        <td class="td-name">${b.owner}</td>
+        <td>${b.name}</td>
+        <td>${b.phone || '-'}</td>
+        <td style="font-size:12px;color:var(--text-muted)">${b.email || '-'}</td>
+        <td>
+          ${(() => {
+            const lm = logs.filter(l=>l.bldId===b.id&&l.type==='meet').sort((a,c)=>c.date.localeCompare(a.date))[0];
+            const lc = logs.filter(l=>l.bldId===b.id&&l.type==='call').sort((a,c)=>c.date.localeCompare(a.date))[0];
+            return [
+              lm ? `<span title="대면">👥 ${lm.date}</span>` : `<span style="color:var(--text-muted)">👥 -</span>`,
+              lc ? `<span title="유선">📞 ${lc.date}</span>` : `<span style="color:var(--text-muted)">📞 -</span>`,
+            ].join('<br>');
+          })()}
+        </td>
+        <td>${b.next || '-'}</td>
+        <td>${statusBadge(s)}</td>
+        <td>
+          <button class="btn btn-secondary btn-sm" onclick="openDetailModal(${b.id})">상세</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+/* -- 캘린더 -- */
+let calYear, calMonth;
+
+function renderCalendar() {
+  const label = document.getElementById('cal-label');
+  label.textContent = `${calYear}년 ${calMonth + 1}월`;
+
+  const firstDow = new Date(calYear, calMonth, 1).getDay();
+  const lastDay  = new Date(calYear, calMonth + 1, 0).getDate();
+  const tStr     = todayStr();
+
+  let html = '';
+
+  // prev month cells
+  const prevLast = new Date(calYear, calMonth, 0).getDate();
+  for (let i = firstDow - 1; i >= 0; i--) {
+    html += `<div class="cal-cell other"><div class="day-num">${prevLast - i}</div></div>`;
+  }
+
+  for (let d = 1; d <= lastDay; d++) {
+    const ds = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayLogs = logs.filter(l => l.date === ds);
+    const isToday = ds === tStr;
+
+    const events = dayLogs.slice(0, 3).map(l => {
+      const bname = bName(l.bldId);
+      return `<div class="cal-event ${l.type}" title="${bname}">${bname.slice(0, 7)}</div>`;
+    }).join('');
+    const more = dayLogs.length > 3 ? `<div class="cal-more">+${dayLogs.length - 3}건</div>` : '';
+
+    html += `
+      <div class="cal-cell${isToday ? ' today' : ''}">
+        <div class="day-num">${d}</div>
+        ${events}${more}
+      </div>
+    `;
+  }
+
+  // next month cells
+  const total = firstDow + lastDay;
+  const remainder = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= remainder; i++) {
+    html += `<div class="cal-cell other"><div class="day-num">${i}</div></div>`;
+  }
+
+  document.getElementById('cal-days').innerHTML = html;
+}
+
+/* -- 소통 기록 페이지 -- */
+function renderLogPage() {
+  const typeF  = document.getElementById('filter-type').value;
+  const bldF   = document.getElementById('filter-bld').value;
+  const monthF = document.getElementById('filter-month').value;
+
+  let filtered = logs.slice().sort((a, b) => b.date.localeCompare(a.date));
+  if (typeF)  filtered = filtered.filter(l => l.type === typeF);
+  if (bldF)   filtered = filtered.filter(l => l.bldId === parseInt(bldF));
+  if (monthF) filtered = filtered.filter(l => l.date.startsWith(monthF));
+
+  const feed = document.getElementById('log-feed');
+  feed.innerHTML = filtered.length
+    ? filtered.map(l => logItemHTML(l, true)).join('')
+    : '<div class="empty"><i class="ti ti-clipboard"></i><p>소통 기록이 없습니다.</p></div>';
+}
+
+function updateFilterOptions() {
+  // 건물 필터
+  const bSel = document.getElementById('filter-bld');
+  const bVal = bSel.value;
+  bSel.innerHTML = '<option value="">전체 건물</option>' +
+    buildings.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+  bSel.value = bVal;
+
+  // 월 필터 (기록된 월만)
+  const months = [...new Set(logs.map(l => l.date.slice(0, 7)))].sort().reverse();
+  const mSel = document.getElementById('filter-month');
+  const mVal = mSel.value;
+  mSel.innerHTML = '<option value="">전체 기간</option>' +
+    months.map(m => `<option value="${m}">${m.replace('-', '년 ')}월</option>`).join('');
+  mSel.value = mVal;
+}
+
+/* ============================================================
+   WEEKLY REPORT HELPERS
+   ============================================================ */
+
+// 날짜 → 해당 주 월요일 반환 (YYYY-MM-DD)
+function getMondayOf(dateStr) {
+  const d = new Date(dateStr);
+  const day = d.getDay(); // 0=일, 1=월
+  const diff = day === 0 ? -6 : 1 - day;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().split('T')[0];
+}
+
+// 월요일 날짜 → 표시 라벨 (예: 7/7(월))
+function weekLabel(mondayStr) {
+  const d = new Date(mondayStr + 'T00:00:00');
+  const m = d.getMonth() + 1;
+  const dd = d.getDate();
+  return `${m}/${dd}(월)`;
+}
+
+// 주차 날짜 범위 텍스트 (월요일 ~ 일요일)
+function weekRangeText(mondayStr) {
+  const mon = new Date(mondayStr + 'T00:00:00');
+  const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+  const fmt = d => `${d.getMonth()+1}월 ${d.getDate()}일`;
+  return `${fmt(mon)} ~ ${fmt(sun)}`;
+}
+
+let currentWeekKey = null; // 현재 보고 있는 주차 (월요일 날짜)
+
+function addWeekFromDate() {
+  const val = document.getElementById('week-date-pick').value;
+  const monday = val ? getMondayOf(val) : getMondayOf(todayStr());
+  if (!weeklyWeeks.includes(monday)) {
+    weeklyWeeks.push(monday);
+    weeklyWeeks.sort().reverse();
+    persistSave();
+  }
+  currentWeekKey = monday;
+  updateURLHash();
+  renderWeekly();
+}
+
+function selectWeek(key) {
+  currentWeekKey = key;
+  updateURLHash();
+  renderWeekly();
+}
+
+// URL 해시로 주차 공유
+function updateURLHash() {
+  if (currentWeekKey) {
+    history.replaceState(null, '', '#weekly/' + currentWeekKey);
+    const url = location.href;
+    document.getElementById('share-url-text').textContent = url;
+    document.getElementById('share-bar').style.display = 'flex';
+  }
+}
+
+function copyReportLink() {
+  const url = location.href.split('#')[0] + (currentWeekKey ? '#weekly/' + currentWeekKey : '#weekly');
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('btn-share-report');
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="ti ti-check"></i>복사됨!';
+    setTimeout(() => btn.innerHTML = orig, 1500);
+  });
+}
+
+/* -- 파트 관리 -- */
+function openPartsModal() {
+  renderPartsEdit();
+  openModal('modal-parts');
+}
+
+function renderPartsEdit() {
+  document.getElementById('parts-list-edit').innerHTML = weeklyParts.map(p => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="width:14px;height:14px;border-radius:50%;background:${p.color};display:inline-block;flex-shrink:0"></span>
+      <span style="flex:1;font-size:13px;font-weight:500">${p.name}</span>
+      <button class="btn btn-secondary btn-sm" onclick="deletePart(${p.id})"><i class="ti ti-trash"></i></button>
+    </div>
+  `).join('') || '<div style="color:var(--text-muted);font-size:13px;padding:8px 0">파트가 없습니다. 아래에서 추가하세요.</div>';
+}
+
+function addPart() {
+  const name  = document.getElementById('new-part-name').value.trim();
+  const color = document.getElementById('new-part-color').value;
+  if (!name) { alert('파트명을 입력하세요.'); return; }
+  if (weeklyParts.find(p => p.name === name)) { alert('같은 이름의 파트가 있습니다.'); return; }
+  weeklyParts.push({ id: Date.now(), name, color });
+  persistSave();
+  document.getElementById('new-part-name').value = '';
+  renderPartsEdit();
+}
+
+function deletePart(id) {
+  if (!confirm('이 파트를 삭제하면 관련 보고 항목도 모두 삭제됩니다. 계속하시겠습니까?')) return;
+  weeklyParts  = weeklyParts.filter(p => p.id !== id);
+  weeklyItems  = weeklyItems.filter(i => i.partId !== id);
+  persistSave();
+  renderPartsEdit();
+}
+
+/* -- 보고 항목 -- */
+function openReportItemModal(partId = null) {
+  if (!currentWeekKey) { alert('먼저 보고 주차를 선택하세요.'); return; }
+  // 파트 셀렉트
+  document.getElementById('ri-part').innerHTML = weeklyParts
+    .map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  if (partId) document.getElementById('ri-part').value = partId;
+  // 건물 셀렉트
+  document.getElementById('ri-bld').innerHTML =
+    '<option value="">— 선택 안 함 —</option>' +
+    buildings.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+  document.getElementById('ri-content').value  = '';
+  document.getElementById('ri-person').value   = '';
+  document.getElementById('ri-status').value   = 'normal';
+  openModal('modal-report-item');
+}
+
+function saveReportItem() {
+  const content = document.getElementById('ri-content').value.trim();
+  const partId  = parseInt(document.getElementById('ri-part').value);
+  if (!content || !partId) { alert('파트와 내용을 입력하세요.'); return; }
+  weeklyItems.push({
+    id:      Date.now(),
+    weekKey: currentWeekKey,
+    partId,
+    content,
+    person:  document.getElementById('ri-person').value.trim(),
+    status:  document.getElementById('ri-status').value,
+    bldId:   document.getElementById('ri-bld').value ? parseInt(document.getElementById('ri-bld').value) : null,
+  });
+  persistSave();
+  closeModal('modal-report-item');
+  renderWeekly();
+}
+
+function deleteReportItem(id) {
+  weeklyItems = weeklyItems.filter(i => i.id !== id);
+  persistSave();
+  renderWeekly();
+}
+
+const STATUS_BADGE = {
+  done:    ['badge-green', '완료'],
+  issue:   ['badge-red',   '이슈'],
+  pending: ['badge-amber', '보류'],
+  normal:  ['', ''],
+};
+
+/* -- 주간 보고 렌더링 -- */
+function renderWeekTabs() {
+  const tabs = document.getElementById('week-tabs');
+  if (!weeklyWeeks.length) {
+    tabs.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">아래 날짜를 선택하고 주차를 추가하세요</span>';
+    return;
+  }
+  tabs.innerHTML = weeklyWeeks.map(w => `
+    <button class="week-tab ${w === currentWeekKey ? 'active' : ''}" onclick="selectWeek('${w}')">
+      ${weekLabel(w)}
+    </button>
+  `).join('');
+}
+
+function renderWeekly() {
+  renderWeekTabs();
+  const body = document.getElementById('weekly-report-body');
+
+  if (!currentWeekKey) {
+    document.getElementById('import-panel').style.display = 'none';
+    body.innerHTML = `<div class="empty"><i class="ti ti-file-report"></i><p>보고 주차를 선택하거나 추가하세요.<br>날짜를 선택한 뒤 <strong>주차 추가</strong>를 클릭하면 해당 주 보고서가 생성됩니다.</p></div>`;
+    return;
+  }
+
+  // 주차 바뀌면 불러오기 패널 닫기 & 선택 초기화
+  selectedLogIds.clear();
+
+  const weekItems = weeklyItems.filter(i => i.weekKey === currentWeekKey);
+
+  // URL 해시 업데이트
+  const url = location.href.split('#')[0] + '#weekly/' + currentWeekKey;
+  document.getElementById('share-url-text').textContent = url;
+  document.getElementById('share-bar').style.display = 'flex';
+
+  // 보고서 헤더
+  body.innerHTML = `
+    <div class="report-header">
+      <div class="report-header-left">
+        <h1>📋 주간 미팅 보고 — ${weekLabel(currentWeekKey)} 기준</h1>
+        <p>${weekRangeText(currentWeekKey)} &nbsp;·&nbsp; 총 ${weekItems.length}개 항목</p>
+      </div>
+      <div class="report-header-right no-print">
+        <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff" onclick="showImportPanel()">
+          <i class="ti ti-database-import"></i>소통 기록 불러오기
+        </button>
+        <button class="btn btn-secondary btn-sm" style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff" onclick="openPartsModal()">
+          <i class="ti ti-settings"></i>파트 설정
+        </button>
+      </div>
+    </div>
+
+    <div class="parts-grid">
+      ${weeklyParts.map(p => {
+        const items = weekItems.filter(i => i.partId === p.id);
+        return `
+          <div class="part-card">
+            <div class="part-card-head">
+              <div class="part-card-title">
+                <span class="part-dot" style="background:${p.color}"></span>
+                ${p.name}
+                <span class="badge badge-gray" style="margin-left:4px">${items.length}</span>
+              </div>
+              <button class="btn btn-secondary btn-sm no-print" onclick="openReportItemModal(${p.id})" title="항목 추가">
+                <i class="ti ti-plus"></i>
+              </button>
+            </div>
+            <div class="part-card-body">
+              ${items.length ? items.map((item, idx) => {
+                const [badgeCls, badgeTxt] = STATUS_BADGE[item.status] || STATUS_BADGE.normal;
+                const relBld = item.bldId ? buildings.find(b => b.id === item.bldId) : null;
+                return `
+                  <div class="part-item">
+                    <div class="part-item-num">${idx + 1}</div>
+                    <div class="part-item-text">
+                      <div style="display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap">
+                        <span>${item.content}</span>
+                        ${badgeCls ? `<span class="badge ${badgeCls}" style="flex-shrink:0">${badgeTxt}</span>` : ''}
+                      </div>
+                      <div class="part-item-meta">
+                        ${item.person ? `<i class="ti ti-user" style="font-size:10px"></i>${item.person}` : ''}
+                        ${item.person && relBld ? ' &nbsp;·&nbsp; ' : ''}
+                        ${relBld ? `<i class="ti ti-building" style="font-size:10px"></i>${relBld.name}` : ''}
+                      </div>
+                    </div>
+                    <button class="part-item-del no-print" onclick="deleteReportItem(${item.id})" title="삭제">
+                      <i class="ti ti-x"></i>
+                    </button>
+                  </div>
+                `;
+              }).join('') : `<div style="color:var(--text-muted);font-size:12px;padding:8px 0;text-align:center">아직 항목이 없습니다.</div>`}
+              <button class="part-add-btn no-print" onclick="openReportItemModal(${p.id})">
+                <i class="ti ti-plus"></i> 항목 추가
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+/* ============================================================
+   IMPORT FROM LOGS
+   ============================================================ */
+
+let importPanelOpen = true;
+
+function showImportPanel() {
+  const panel = document.getElementById('import-panel');
+  panel.style.display = '';
+  importPanelOpen = true;
+  document.getElementById('import-chevron').className = 'ti ti-chevron-up';
+  document.getElementById('import-panel-body').classList.remove('collapsed');
+
+  // 기간 기본값: 해당 주 월~일
+  document.getElementById('imp-range').value = 'week';
+  document.getElementById('imp-from').value = currentWeekKey || todayStr();
+  const sunDate = new Date((currentWeekKey || todayStr()) + 'T00:00:00');
+  sunDate.setDate(sunDate.getDate() + 6);
+  document.getElementById('imp-to').value = sunDate.toISOString().split('T')[0];
+
+  // 주차 라벨
+  document.getElementById('import-week-label').textContent =
+    currentWeekKey ? weekRangeText(currentWeekKey) : '';
+
+  // 건물 필터 옵션
+  document.getElementById('imp-bld').innerHTML =
+    '<option value="">전체</option>' +
+    buildings.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+
+  // 파트 선택
+  document.getElementById('imp-part').innerHTML =
+    weeklyParts.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+  renderImportList();
+  // 스크롤해서 패널 보이게
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleImportPanel() {
+  importPanelOpen = !importPanelOpen;
+  document.getElementById('import-panel-body').classList.toggle('collapsed', !importPanelOpen);
+  document.getElementById('import-chevron').className =
+    importPanelOpen ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
+}
+
+// 날짜 범위 계산
+function getImportDateRange() {
+  const range = document.getElementById('imp-range').value;
+  const today = todayStr();
+  let from, to;
+
+  if (range === 'week') {
+    // 선택된 주의 월~일
+    from = currentWeekKey || getMondayOf(today);
+    const sun = new Date(from + 'T00:00:00'); sun.setDate(sun.getDate() + 6);
+    to = sun.toISOString().split('T')[0];
+  } else if (range === '2week') {
+    const mon = new Date((currentWeekKey || getMondayOf(today)) + 'T00:00:00');
+    mon.setDate(mon.getDate() - 7);
+    from = mon.toISOString().split('T')[0];
+    const sun = new Date((currentWeekKey || getMondayOf(today)) + 'T00:00:00');
+    sun.setDate(sun.getDate() + 6);
+    to = sun.toISOString().split('T')[0];
+  } else if (range === 'month') {
+    const d = new Date(today); d.setDate(d.getDate() - 30);
+    from = d.toISOString().split('T')[0];
+    to = today;
+  } else {
+    from = document.getElementById('imp-from').value || today;
+    to   = document.getElementById('imp-to').value   || today;
+  }
+  return { from, to };
+}
+
+// 이미 이번 주 보고서에 추가된 log ID 집합
+function alreadyImportedIds() {
+  return new Set(
+    weeklyItems
+      .filter(i => i.weekKey === currentWeekKey && i.sourceLogId)
+      .map(i => i.sourceLogId)
+  );
+}
+
+let selectedLogIds = new Set();
+
+function renderImportList() {
+  const rangeEl = document.getElementById('imp-range');
+  const customDates = document.getElementById('imp-custom-dates');
+  if (rangeEl.value === 'custom') {
+    customDates.style.display = 'flex';
+  } else {
+    customDates.style.display = 'none';
+  }
+
+  const { from, to } = getImportDateRange();
+  const typeF = document.getElementById('imp-type').value;
+  const bldF  = document.getElementById('imp-bld').value;
+  const already = alreadyImportedIds();
+
+  let filtered = logs
+    .filter(l => l.date >= from && l.date <= to)
+    .filter(l => !typeF || l.type === typeF)
+    .filter(l => !bldF  || l.bldId === parseInt(bldF))
+    .sort((a, b) => b.date.localeCompare(a.date));
+
+  const el = document.getElementById('import-log-list');
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty" style="padding:24px"><i class="ti ti-inbox"></i><p>해당 기간에 소통 기록이 없습니다.</p></div>`;
+    updateImportInfo();
+    return;
+  }
+
+  el.innerHTML = filtered.map(l => {
+    const b = buildings.find(x => x.id === l.bldId);
+    const isAlready = already.has(l.id);
+    const isSelected = selectedLogIds.has(l.id);
+    const meta = TYPE_META[l.type] || TYPE_META.call;
+    return `
+      <label class="import-log-item${isAlready ? ' already' : ''}${isSelected ? ' selected' : ''}" for="imp-chk-${l.id}">
+        <input type="checkbox" id="imp-chk-${l.id}"
+          ${isAlready ? 'disabled checked' : ''}
+          ${isSelected && !isAlready ? 'checked' : ''}
+          onchange="toggleImportSelect(${l.id}, this.checked)">
+        <div class="import-log-item-body">
+          <div class="import-log-item-row1">
+            <span class="import-log-item-bld">${b ? b.name : '(삭제됨)'}</span>
+            <span class="badge ${meta.badge}"><i class="ti ${meta.icon}" style="font-size:10px"></i>${meta.label}</span>
+            <span class="import-log-item-date">${l.date}${l.staff ? ' · ' + l.staff : ''}</span>
+          </div>
+          <div class="import-log-item-content">${l.content || '(내용 없음)'}</div>
+        </div>
+        ${isAlready ? '<span class="badge badge-gray" style="flex-shrink:0;white-space:nowrap">이미 추가됨</span>' : ''}
+      </label>
+    `;
+  }).join('');
+
+  updateImportInfo();
+}
+
+function toggleImportSelect(id, checked) {
+  if (checked) selectedLogIds.add(id);
+  else selectedLogIds.delete(id);
+  // 행 selected 클래스 갱신
+  const row = document.querySelector(`label[for="imp-chk-${id}"]`);
+  if (row) row.classList.toggle('selected', checked);
+  updateImportInfo();
+}
+
+function toggleSelectAll() {
+  const checkboxes = document.querySelectorAll('#import-log-list input[type=checkbox]:not(:disabled)');
+  const allChecked = [...checkboxes].every(c => c.checked);
+  checkboxes.forEach(c => {
+    c.checked = !allChecked;
+    const id = parseInt(c.id.replace('imp-chk-', ''));
+    const row = document.querySelector(`label[for="imp-chk-${id}"]`);
+    if (!allChecked) { selectedLogIds.add(id); if (row) row.classList.add('selected'); }
+    else            { selectedLogIds.delete(id); if (row) row.classList.remove('selected'); }
+  });
+  updateImportInfo();
+}
+
+function updateImportInfo() {
+  const cnt = selectedLogIds.size;
+  document.getElementById('import-selected-info').textContent =
+    cnt ? `${cnt}개 선택됨` : '선택된 항목 없음';
+}
+
+function importSelectedLogs() {
+  if (!selectedLogIds.size) { alert('불러올 소통 기록을 선택하세요.'); return; }
+  const partId = parseInt(document.getElementById('imp-part').value);
+  if (!partId) { alert('파트를 선택하세요.'); return; }
+
+  let added = 0;
+  const already = alreadyImportedIds();
+
+  selectedLogIds.forEach(logId => {
+    if (already.has(logId)) return; // 중복 방지
+    const l = logs.find(x => x.id === logId);
+    if (!l) return;
+    const b = buildings.find(x => x.id === l.bldId);
+    const meta = TYPE_META[l.type] || TYPE_META.call;
+
+    // 내용: "[유형] 건물명 — 원본 내용" 형식으로 자동 구성
+    const autoContent = [
+      `[${meta.label}]`,
+      b ? b.name : '',
+      l.content ? '— ' + l.content : '',
+    ].filter(Boolean).join(' ');
+
+    weeklyItems.push({
+      id:          Date.now() + added,
+      weekKey:     currentWeekKey,
+      partId,
+      content:     autoContent,
+      person:      l.staff || '',
+      status:      'normal',
+      bldId:       l.bldId || null,
+      sourceLogId: logId,   // 원본 기록 ID 저장 (중복 방지용)
+    });
+    added++;
+  });
+
+  if (!added) { alert('선택한 항목이 이미 모두 추가되어 있습니다.'); return; }
+
+  persistSave();
+  selectedLogIds.clear();
+
+  // 패널 닫기
+  document.getElementById('import-panel').style.display = 'none';
+
+  renderWeekly();
+
+  // 완료 피드백
+  const btn = document.querySelector('[onclick="importSelectedLogs()"]');
+  if (btn) {
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<i class="ti ti-check"></i> ${added}개 추가 완료!`;
+    setTimeout(() => { if (btn) btn.innerHTML = orig; }, 2000);
+  }
+}
+
+/* ============================================================
+   RENDER ALL
+   ============================================================ */
+function renderAll() {
+  renderOverview();
+  renderBuildings();
+  renderOwners();
+  renderCalendar();
+  updateFilterOptions();
+  renderLogPage();
+  renderWeekly();
+}
+
+/* ============================================================
+   NAV
+   ============================================================ */
+const PAGE_CONFIG = {
+  overview:  { title: '대시보드',    showBuildingBtn: true,  showLogBtn: false, showReportBtns: false },
+  buildings: { title: '건물 관리',   showBuildingBtn: true,  showLogBtn: false, showReportBtns: false },
+  owners:    { title: '임대인 관리', showBuildingBtn: false, showLogBtn: false, showReportBtns: false },
+  calendar:  { title: '미팅 캘린더', showBuildingBtn: false, showLogBtn: true,  showReportBtns: false },
+  logs:      { title: '소통 기록',   showBuildingBtn: false, showLogBtn: true,  showReportBtns: false },
+  weekly:    { title: '주간 미팅 보고', showBuildingBtn: false, showLogBtn: false, showReportBtns: true },
+};
+
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const pg = item.dataset.page;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('page-' + pg).classList.add('active');
+
+    const cfg = PAGE_CONFIG[pg] || {};
+    document.getElementById('page-title').textContent = cfg.title || '';
+    document.getElementById('btn-building').style.display      = cfg.showBuildingBtn ? '' : 'none';
+    document.getElementById('btn-log').style.display           = cfg.showLogBtn      ? '' : 'none';
+    document.getElementById('btn-share-report').style.display  = cfg.showReportBtns  ? '' : 'none';
+    document.getElementById('btn-print-report').style.display  = cfg.showReportBtns  ? '' : 'none';
+    document.getElementById('btn-add-report-item').style.display = cfg.showReportBtns ? '' : 'none';
+    if (pg === 'weekly') renderWeekly();
+    if (pg !== 'weekly') history.replaceState(null, '', location.pathname);
+  });
+});
+
+/* ============================================================
+   CALENDAR NAV
+   ============================================================ */
+document.getElementById('prev-month').addEventListener('click', () => {
+  calMonth--;
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+});
+document.getElementById('next-month').addEventListener('click', () => {
+  calMonth++;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  renderCalendar();
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+(function init() {
+  const now = new Date();
+  calYear   = now.getFullYear();
+  calMonth  = now.getMonth();
+  persistLoad();
+
+  // URL 해시 라우팅 — #weekly/YYYY-MM-DD 형식으로 직접 접근 지원
+  const hash = location.hash; // 예: #weekly/2025-07-07
+  if (hash.startsWith('#weekly')) {
+    const parts = hash.split('/');
+    if (parts[1] && /^\d{4}-\d{2}-\d{2}$/.test(parts[1])) {
+      const monday = getMondayOf(parts[1]);
+      currentWeekKey = monday;
+      // 해당 주차가 목록에 없으면 자동 추가
+      if (!weeklyWeeks.includes(monday)) {
+        weeklyWeeks.push(monday);
+        weeklyWeeks.sort().reverse();
+        persistSave();
+      }
+    }
+    // weekly 페이지로 이동
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const weekNav = document.querySelector('.nav-item[data-page="weekly"]');
+    if (weekNav) weekNav.classList.add('active');
+    document.getElementById('page-weekly').classList.add('active');
+    document.getElementById('page-title').textContent = '주간 미팅 보고';
+    document.getElementById('btn-building').style.display        = 'none';
+    document.getElementById('btn-log').style.display             = 'none';
+    document.getElementById('btn-share-report').style.display    = '';
+    document.getElementById('btn-print-report').style.display    = '';
+    document.getElementById('btn-add-report-item').style.display = '';
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
