@@ -679,6 +679,89 @@
   .import-part-assign label { font-size: 12px; color: var(--text-secondary); }
   .import-part-assign select { padding: 5px 8px; border: 1px solid var(--border-strong); border-radius: var(--radius); font-size: 12px; background: #fff; }
 
+  /* ===== DB STATUS INDICATOR ===== */
+  .db-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 99px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid;
+    cursor: default;
+    white-space: nowrap;
+    transition: all .3s;
+    user-select: none;
+  }
+  .db-status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  /* 연결 중 */
+  .db-status.connecting {
+    background: #f9fafb; color: #6b7280; border-color: #e5e7eb;
+  }
+  .db-status.connecting .db-status-dot {
+    background: #9ca3af;
+    animation: db-pulse 1s infinite;
+  }
+  /* 연결됨 */
+  .db-status.connected {
+    background: #f0fdf4; color: #16a34a; border-color: #bbf7d0;
+  }
+  .db-status.connected .db-status-dot {
+    background: #16a34a;
+    animation: db-blink 2.5s infinite;
+  }
+  /* 동기화 중 */
+  .db-status.syncing {
+    background: #EBF3FD; color: #3B8CE4; border-color: #b3d3f5;
+  }
+  .db-status.syncing .db-status-dot {
+    background: #3B8CE4;
+    animation: db-pulse .6s infinite;
+  }
+  /* 오류 */
+  .db-status.error {
+    background: #fef2f2; color: #dc2626; border-color: #fecaca;
+  }
+  .db-status.error .db-status-dot {
+    background: #dc2626;
+  }
+  @keyframes db-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: .4; transform: scale(.8); }
+  }
+  @keyframes db-blink {
+    0%, 90%, 100% { opacity: 1; }
+    95%           { opacity: .3; }
+  }
+
+  /* 동기화 토스트 */
+  .sync-toast {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    background: #1a1a1a;
+    color: #fff;
+    font-size: 12px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 300;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .2s, transform .2s;
+    pointer-events: none;
+  }
+  .sync-toast.show { opacity: 1; transform: translateY(0); }
+  .sync-toast i { font-size: 14px; }
+  .sync-toast.ok i { color: #4ade80; }
+  .sync-toast.err i { color: #f87171; }
+
   /* ===== SUPABASE PLACEHOLDER COMMENT ===== */
   /*
   ==============================================
@@ -730,12 +813,23 @@
     <div class="topbar">
       <span class="topbar-title" id="page-title">대시보드</span>
       <div class="topbar-actions" id="topbar-actions">
+        <!-- DB 연결 상태 -->
+        <div class="db-status connecting" id="db-status" title="Supabase 연결 상태">
+          <span class="db-status-dot"></span>
+          <span id="db-status-text">연결 중...</span>
+        </div>
         <button class="btn btn-secondary" id="btn-log" onclick="openLogModal()" style="display:none"><i class="ti ti-phone"></i>기록 추가</button>
         <button class="btn btn-secondary" id="btn-share-report" onclick="copyReportLink()" style="display:none"><i class="ti ti-link"></i>링크 복사</button>
         <button class="btn btn-secondary" id="btn-print-report" onclick="window.print()" style="display:none"><i class="ti ti-printer"></i>인쇄</button>
         <button class="btn btn-primary" id="btn-add-report-item" onclick="openReportItemModal()" style="display:none"><i class="ti ti-plus"></i>항목 추가</button>
         <button class="btn btn-primary" id="btn-building" onclick="openBuildingModal()"><i class="ti ti-plus"></i>건물 추가</button>
       </div>
+    </div>
+
+    <!-- 동기화 토스트 -->
+    <div class="sync-toast" id="sync-toast">
+      <i class="ti ti-check"></i>
+      <span id="sync-toast-msg">저장 완료</span>
     </div>
 
     <!-- content -->
@@ -1164,30 +1258,48 @@ function itemToDb(d) {
   };
 }
 
-/* 로딩 표시 */
-function showLoading(msg = '불러오는 중...') {
-  let el = document.getElementById('db-loading');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'db-loading';
-    el.style.cssText = 'position:fixed;top:56px;left:0;right:0;background:#3B8CE4;color:#fff;font-size:12px;text-align:center;padding:6px;z-index:999;';
-    document.body.appendChild(el);
-  }
-  el.textContent = msg;
-  el.style.display = '';
+/* ============================================================
+   DB 연결 상태 표시
+   ============================================================ */
+let _toastTimer = null;
+
+function setDbStatus(state, text) {
+  const el   = document.getElementById('db-status');
+  const txtEl = document.getElementById('db-status-text');
+  if (!el) return;
+  el.className = 'db-status ' + state;
+  txtEl.textContent = text;
 }
+
+function showToast(msg, type = 'ok') {
+  const toast = document.getElementById('sync-toast');
+  const msgEl = document.getElementById('sync-toast-msg');
+  const icon  = toast.querySelector('i');
+  if (!toast) return;
+  msgEl.textContent = msg;
+  toast.className = 'sync-toast show ' + type;
+  icon.className  = type === 'ok' ? 'ti ti-check' : 'ti ti-alert-triangle';
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 2200);
+}
+
+function showLoading(msg = '동기화 중...') {
+  setDbStatus('syncing', msg);
+}
+
 function hideLoading() {
-  const el = document.getElementById('db-loading');
-  if (el) el.style.display = 'none';
+  setDbStatus('connected', 'Supabase 연결됨');
 }
+
 function showError(msg) {
-  const el = document.getElementById('db-loading');
-  if (el) { el.style.background = '#dc2626'; el.textContent = '⚠ ' + msg; setTimeout(hideLoading, 3000); }
+  setDbStatus('error', '연결 오류');
+  showToast(msg, 'err');
+  setTimeout(() => setDbStatus('connected', 'Supabase 연결됨'), 4000);
 }
 
 /* ── 전체 데이터 로드 ── */
 async function persistLoad() {
-  showLoading('데이터 불러오는 중...');
+  showLoading('불러오는 중...');
   try {
     const [b, l, p, i, w] = await Promise.all([
       sb.from('buildings').select('*').order('created_at'),
@@ -1201,9 +1313,14 @@ async function persistLoad() {
     weeklyParts = (p.data || []).map(dbToPart);
     weeklyItems = (i.data || []).map(dbToItem);
     weeklyWeeks = (w.data || []).map(r => r.week_key);
-    hideLoading();
+
+    // 마지막 동기화 시각 표시
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    setDbStatus('connected', `연동됨 · ${timeStr}`);
   } catch(e) {
-    showError('데이터 로드 실패: ' + e.message);
+    setDbStatus('error', '연결 실패');
+    showToast('데이터 로드 실패: ' + e.message, 'err');
   }
 }
 
@@ -1371,6 +1488,7 @@ async function saveBuilding() {
       if (error) throw error;
     }
     await persistLoad();
+    showToast(editBuildingId ? '건물 정보 수정 완료' : '건물 추가 완료');
     closeModal('modal-building');
     renderAll();
   } catch(e) { showError('저장 실패: ' + e.message); }
@@ -1410,6 +1528,7 @@ async function saveLog() {
       await sb.from('buildings').update({ next_date: logData.next }).eq('id', bldId);
     }
     await persistLoad();
+    showToast('소통 기록 저장 완료');
     closeModal('modal-log');
     renderAll();
   } catch(e) { showError('저장 실패: ' + e.message); }
@@ -1471,6 +1590,7 @@ async function deleteBuilding(id) {
     const { error } = await sb.from('buildings').delete().eq('id', id);
     if (error) throw error;
     await persistLoad();
+    showToast('건물 삭제 완료');
     closeModal('modal-detail');
     renderAll();
   } catch(e) { showError('삭제 실패: ' + e.message); }
@@ -1483,6 +1603,7 @@ async function deleteLog(id) {
     const { error } = await sb.from('contact_logs').delete().eq('id', id);
     if (error) throw error;
     await persistLoad();
+    showToast('기록 삭제 완료');
     renderAll();
   } catch(e) { showError('삭제 실패: ' + e.message); }
 }
@@ -1831,6 +1952,7 @@ async function saveReportItem() {
     const { error } = await sb.from('weekly_items').insert(itemToDb(item));
     if (error) throw error;
     await persistLoad();
+    showToast('보고 항목 저장 완료');
     closeModal('modal-report-item');
     renderWeekly();
   } catch(e) { showError('저장 실패: ' + e.message); }
@@ -2252,6 +2374,20 @@ document.getElementById('next-month').addEventListener('click', () => {
   }
 
   renderAll();
+
+  // 30초마다 연결 상태 갱신 (ping)
+  setInterval(async () => {
+    try {
+      await sb.from('buildings').select('id').limit(1);
+      const t = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setDbStatus('connected', `연동됨 · ${t}`);
+    } catch(e) {
+      setDbStatus('error', '연결 끊김 — 재시도 중...');
+      setTimeout(async () => {
+        try { await persistLoad(); renderAll(); } catch(_) {}
+      }, 3000);
+    }
+  }, 30000);
 })();
 </script>
 </body>
