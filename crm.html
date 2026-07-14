@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>둥지 CRM — 영업팀 고객관리</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
   /* ===== LAUNCHER BACK BUTTON ===== */
@@ -1196,8 +1197,11 @@
 </div>
 
 <!-- ===================== SCRIPTS ===================== -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* supabase 전역 객체 안전 확인 */
+if (typeof supabase === 'undefined') {
+  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;flex-direction:column;gap:12px"><div style="font-size:32px">⚠️</div><div style="font-size:16px;font-weight:600">Supabase 라이브러리를 불러오지 못했습니다.</div><div style="font-size:13px;color:#888">인터넷 연결을 확인하고 새로고침 해주세요.</div><button onclick="location.reload()" style="margin-top:8px;padding:8px 20px;background:#3B8CE4;color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px">새로고침</button></div>';
+}
 /* ============================================================
    SUPABASE 설정
    ============================================================ */
@@ -2344,9 +2348,15 @@ document.getElementById('next-month').addEventListener('click', () => {
   const now = new Date();
   calYear   = now.getFullYear();
   calMonth  = now.getMonth();
-  await persistLoad();
 
-  // URL 해시 라우팅 — #weekly/YYYY-MM-DD 형식으로 직접 접근 지원
+  // DB 로드 실패해도 UI는 반드시 렌더링
+  try {
+    await persistLoad();
+  } catch(e) {
+    setDbStatus('error', '연결 실패 — 재시도 필요');
+  }
+
+  // URL 해시 라우팅
   const hash = location.hash;
   if (hash.startsWith('#weekly')) {
     const parts = hash.split('/');
@@ -2357,7 +2367,7 @@ document.getElementById('next-month').addEventListener('click', () => {
         try {
           await sb.from('weekly_weeks').insert({ week_key: monday });
           await persistLoad();
-        } catch(e) { /* 중복 무시 */ }
+        } catch(_) {}
       }
     }
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
