@@ -769,7 +769,7 @@
     <div class="topbar">
       <span class="topbar-title" id="page-title">대시보드</span>
       <div class="topbar-actions" id="topbar-actions">
-        <div class="db-status"><span class="db-dot"></span>로컬 저장 중</div>
+        <div class="db-status" id="db-status"><span class="db-dot"></span><span>연결 중...</span></div>
         <button class="btn btn-secondary" id="btn-log" onclick="openLogModal()" style="display:none"><i class="ti ti-phone"></i>기록 추가</button>
         <button class="btn btn-secondary" id="btn-share-report" onclick="copyReportLink()" style="display:none"><i class="ti ti-link"></i>링크 복사</button>
         <button class="btn btn-secondary" id="btn-print-report" onclick="window.print()" style="display:none"><i class="ti ti-printer"></i>인쇄</button>
@@ -1154,11 +1154,11 @@
 // const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /* ============================================================
-   DATA LAYER — Supabase (동적 로드, localStorage 폴백)
+   DATA LAYER — Supabase REST API (순수 fetch, 라이브러리 없음)
    ============================================================ */
 const SB_URL = 'https://qsinuxsloamscbsyptmf.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFzaW51eHNsb2Ftc2Nic3lwdG1mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwMDM2NjgsImV4cCI6MjA5OTU3OTY2OH0.nEHc9vya_GcHiSrrbISY1yLLrBdDX8Dx5mJaCdV8dsQ';
-let sb = null;
+const SB_HEADERS = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
 
 let buildings   = [];
 let logs        = [];
@@ -1166,7 +1166,28 @@ let weeklyParts = [];
 let weeklyItems = [];
 let weeklyWeeks = [];
 
-// DB 행 ↔ JS 객체 변환
+/* ── Supabase REST 헬퍼 ── */
+async function sbGet(table, params = '') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: SB_HEADERS });
+  if (!r.ok) throw new Error(`GET ${table} failed: ${r.status}`);
+  return r.json();
+}
+async function sbPost(table, body) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method: 'POST', headers: SB_HEADERS, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error(`POST ${table} failed: ${r.status}`);
+  return r.json();
+}
+async function sbPatch(table, id, body) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'PATCH', headers: SB_HEADERS, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error(`PATCH ${table} failed: ${r.status}`);
+  return r.json();
+}
+async function sbDelete(table, id) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: SB_HEADERS });
+  if (!r.ok) throw new Error(`DELETE ${table} failed: ${r.status}`);
+}
+
+/* DB 행 ↔ JS 객체 변환 */
 const toB  = r => ({id:r.id,name:r.name,addr:r.addr,type:r.type,area:r.area,floors:r.floors,owner:r.owner,phone:r.phone,email:r.email,contractStart:r.contract_start,next:r.next_date,memo:r.memo,created:(r.created_at||'').split('T')[0]});
 const toL  = r => ({id:r.id,bldId:r.building_id,type:r.type,date:r.date,staff:r.staff,content:r.content,next:r.next_date});
 const toP  = r => ({id:r.id,name:r.name,color:r.color});
@@ -1179,6 +1200,7 @@ const fromI = d => ({week_key:d.weekKey,part_id:d.partId,content:d.content,perso
 let _toastT = null;
 function showToast(msg, ok=true) {
   const t = document.getElementById('sync-toast');
+  if (!t) return;
   const ic = t.querySelector('i');
   document.getElementById('sync-msg').textContent = msg;
   ic.className = ok ? 'ti ti-check' : 'ti ti-alert-triangle';
@@ -1190,79 +1212,65 @@ function showToast(msg, ok=true) {
 
 /* 상태 뱃지 */
 function setStatus(state) {
-  const el  = document.getElementById('db-status');
+  const el = document.getElementById('db-status');
+  if (!el) return;
   const dot = el.querySelector('.db-dot');
   const txt = el.querySelector('span:last-child');
   const now = new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  if (state==='ok')      { el.style.cssText='background:var(--green-bg);color:var(--green);border-color:var(--green-border)'; dot.style.background='var(--green)'; txt.textContent='Supabase 연동됨 · '+now; }
-  else if (state==='syncing') { el.style.cssText='background:#EBF3FD;color:#3B8CE4;border-color:#b3d3f5'; dot.style.background='#3B8CE4'; txt.textContent='동기화 중...'; }
-  else                   { el.style.cssText='background:var(--red-bg);color:var(--red);border-color:var(--red-border)'; dot.style.background='var(--red)'; txt.textContent='연결 오류'; }
-}
-
-/* Supabase 스크립트 동적 로드 (한 번만) */
-function loadSbScript() {
-  return new Promise(resolve => {
-    if (window.__sbLoaded) { resolve(true); return; }
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
-    s.onload  = () => {
-      try { sb = window.supabase.createClient(SB_URL, SB_KEY); window.__sbLoaded = true; resolve(true); }
-      catch(e) { resolve(false); }
-    };
-    s.onerror = () => resolve(false);
-    document.head.appendChild(s);
-  });
-}
-
-/* localStorage 폴백 로드 */
-function _localLoad() {
-  try { buildings   = JSON.parse(localStorage.getItem('doongji_crm_buildings')    ||'[]'); } catch(e){buildings=[];}
-  try { logs        = JSON.parse(localStorage.getItem('doongji_crm_logs')         ||'[]'); } catch(e){logs=[];}
-  try { weeklyParts = JSON.parse(localStorage.getItem('doongji_crm_weekly_parts') ||'[]'); } catch(e){weeklyParts=[];}
-  try { weeklyItems = JSON.parse(localStorage.getItem('doongji_crm_weekly_items') ||'[]'); } catch(e){weeklyItems=[];}
-  try { weeklyWeeks = JSON.parse(localStorage.getItem('doongji_crm_weekly_weeks') ||'[]'); } catch(e){weeklyWeeks=[];}
-  if (!weeklyParts.length) weeklyParts = [
-    {id:1,name:'영업팀',color:'#3B8CE4'},{id:2,name:'시설관리',color:'#16a34a'},
-    {id:3,name:'미화용역',color:'#d97706'},{id:4,name:'중개법인',color:'#7c3aed'},{id:5,name:'시공팀',color:'#dc2626'},
-  ];
+  if (state === 'ok') {
+    el.style.cssText = 'background:var(--green-bg);color:var(--green);border-color:var(--green-border)';
+    dot.style.cssText = 'background:var(--green);animation:blink 2.5s infinite';
+    txt.textContent = 'Supabase 연동됨 · ' + now;
+  } else if (state === 'syncing') {
+    el.style.cssText = 'background:#EBF3FD;color:#3B8CE4;border-color:#b3d3f5';
+    dot.style.cssText = 'background:#3B8CE4;animation:db-pulse .6s infinite';
+    txt.textContent = '동기화 중...';
+  } else {
+    el.style.cssText = 'background:var(--red-bg);color:var(--red);border-color:var(--red-border)';
+    dot.style.cssText = 'background:var(--red);animation:none';
+    txt.textContent = 'DB 연결 오류';
+  }
 }
 
 /* ── 전체 데이터 로드 ── */
 async function persistLoad() {
   setStatus('syncing');
-  const loaded = await loadSbScript();
-  if (!loaded || !sb) { setStatus('error'); showToast('DB 연결 실패 — 로컬 사용', false); _localLoad(); return; }
   try {
-    const [b,l,p,it,w] = await Promise.all([
-      sb.from('buildings').select('*').order('created_at'),
-      sb.from('contact_logs').select('*').order('date',{ascending:false}),
-      sb.from('weekly_parts').select('*').order('sort_order'),
-      sb.from('weekly_items').select('*').order('created_at'),
-      sb.from('weekly_weeks').select('*').order('week_key',{ascending:false}),
+    const [b, l, p, it, w] = await Promise.all([
+      sbGet('buildings',    'order=created_at'),
+      sbGet('contact_logs', 'order=date.desc'),
+      sbGet('weekly_parts', 'order=sort_order'),
+      sbGet('weekly_items', 'order=created_at'),
+      sbGet('weekly_weeks', 'order=week_key.desc'),
     ]);
-    if (b.error) throw b.error;
-    buildings   = (b.data||[]).map(toB);
-    logs        = (l.data||[]).map(toL);
-    weeklyParts = (p.data||[]).map(toP);
-    weeklyItems = (it.data||[]).map(toI);
-    weeklyWeeks = (w.data||[]).map(r=>r.week_key);
+    buildings   = b.map(toB);
+    logs        = l.map(toL);
+    weeklyParts = p.map(toP);
+    weeklyItems = it.map(toI);
+    weeklyWeeks = w.map(r => r.week_key);
     setStatus('ok');
-  } catch(e) { setStatus('error'); showToast('로드 실패: '+e.message,false); _localLoad(); }
+  } catch(e) {
+    console.error('persistLoad error:', e);
+    setStatus('error');
+    showToast('DB 연결 실패: ' + e.message, false);
+  }
 }
 
-/* ── 저장/수정/삭제 공통 ── */
+/* ── 저장 공통 래퍼 ── */
 async function _sbOp(fn) {
-  if (!sb) { showToast('DB 없음',false); return null; }
   setStatus('syncing');
   try {
-    const res = await fn();
-    if (res?.error) throw res.error;
+    const result = await fn();
     await persistLoad();
-    return res?.data?.[0] || true;
-  } catch(e) { setStatus('error'); showToast('저장 실패: '+e.message,false); throw e; }
+    return result;
+  } catch(e) {
+    setStatus('error');
+    showToast('저장 실패: ' + e.message, false);
+    throw e;
+  }
 }
 
-/* persistSave — 하위 호환용 (직접 호출 시 아무 것도 안 함) */
+/* persistSave — 하위 호환용 빈 함수 */
 function persistSave() {}
 
 /* ============================================================
@@ -1417,10 +1425,10 @@ async function saveBuilding() {
 
   try {
     if (editBuildingId) {
-      await _sbOp(() => sb.from('buildings').update(fromB(data)).eq('id', editBuildingId));
+      await _sbOp(() => sbPatch('buildings', editBuildingId, fromB(data)));
       showToast('건물 정보 수정 완료');
     } else {
-      await _sbOp(() => sb.from('buildings').insert(fromB(data)));
+      await _sbOp(() => sbPost('buildings', fromB(data)));
       showToast('건물 추가 완료');
     }
     closeModal('modal-building');
@@ -1457,8 +1465,8 @@ async function saveLog() {
   };
 
   try {
-    await _sbOp(() => sb.from('contact_logs').insert(fromL(log)));
-    if (log.next) await sb.from('buildings').update({next_date: log.next}).eq('id', bldId);
+    await _sbOp(() => sbPost('contact_logs', fromL(log)));
+    if (log.next) await sbPatch('buildings', bldId, {next_date: log.next});
     showToast('소통 기록 저장 완료');
     closeModal('modal-log');
     renderAll();
@@ -1517,7 +1525,7 @@ function openDetailModal(id) {
 async function deleteBuilding(id) {
   if (!confirm('이 건물 및 관련 소통 기록을 모두 삭제하시겠습니까?')) return;
   try {
-    await _sbOp(() => sb.from('buildings').delete().eq('id', id));
+    await _sbOp(() => sbDelete('buildings', id));
     showToast('건물 삭제 완료');
     closeModal('modal-detail');
     renderAll();
@@ -1527,7 +1535,7 @@ async function deleteBuilding(id) {
 async function deleteLog(id) {
   if (!confirm('이 소통 기록을 삭제하시겠습니까?')) return;
   try {
-    await _sbOp(() => sb.from('contact_logs').delete().eq('id', id));
+    await _sbOp(() => sbDelete('contact_logs', id));
     showToast('기록 삭제 완료');
     renderAll();
   } catch(e) {}
@@ -1763,7 +1771,7 @@ async function addWeekFromDate() {
   const val = document.getElementById('week-date-pick').value;
   const monday = val ? getMondayOf(val) : getMondayOf(todayStr());
   if (!weeklyWeeks.includes(monday)) {
-    try { await _sbOp(() => sb.from('weekly_weeks').insert({week_key: monday})); } catch(e) {}
+    try { await sbPost('weekly_weeks', {week_key: monday}); await persistLoad(); } catch(e) { if(!e.message.includes('409')) console.error(e); await persistLoad(); }
   }
   currentWeekKey = monday;
   updateURLHash();
@@ -1818,7 +1826,7 @@ async function addPart() {
   if (!name) { alert('파트명을 입력하세요.'); return; }
   if (weeklyParts.find(p => p.name === name)) { alert('같은 이름의 파트가 있습니다.'); return; }
   try {
-    await _sbOp(() => sb.from('weekly_parts').insert({name, color, sort_order: weeklyParts.length+1}));
+    await _sbOp(() => sbPost('weekly_parts', {name, color, sort_order: weeklyParts.length+1}));
     showToast('파트 추가 완료');
     document.getElementById('new-part-name').value = '';
     renderPartsEdit();
@@ -1828,7 +1836,7 @@ async function addPart() {
 async function deletePart(id) {
   if (!confirm('이 파트를 삭제하면 관련 보고 항목도 모두 삭제됩니다. 계속하시겠습니까?')) return;
   try {
-    await _sbOp(() => sb.from('weekly_parts').delete().eq('id', id));
+    await _sbOp(() => sbDelete('weekly_parts', id));
     showToast('파트 삭제 완료');
     renderPartsEdit();
   } catch(e) {}
@@ -1857,7 +1865,7 @@ async function saveReportItem() {
   if (!content || !partId) { alert('파트와 내용을 입력하세요.'); return; }
   const item = {weekKey:currentWeekKey, partId, content, person:document.getElementById('ri-person').value.trim(), status:document.getElementById('ri-status').value, bldId:document.getElementById('ri-bld').value?parseInt(document.getElementById('ri-bld').value):null};
   try {
-    await _sbOp(() => sb.from('weekly_items').insert(fromI(item)));
+    await _sbOp(() => sbPost('weekly_items', fromI(item)));
     showToast('보고 항목 저장 완료');
     closeModal('modal-report-item');
     renderWeekly();
@@ -1866,7 +1874,7 @@ async function saveReportItem() {
 
 async function deleteReportItem(id) {
   try {
-    await sb.from('weekly_items').delete().eq('id', id);
+    await sbDelete('weekly_items', id);
     await persistLoad();
     renderWeekly();
   } catch(e) {}
@@ -2178,7 +2186,7 @@ async function importSelectedLogs() {
   if (!added) { alert('선택한 항목이 이미 모두 추가되어 있습니다.'); return; }
 
   try {
-    await _sbOp(() => sb.from('weekly_items').insert(rows));
+    await _sbOp(() => sbPost('weekly_items', rows));
     showToast(added+'개 항목 추가 완료');
     selectedLogIds.clear();
     document.getElementById('import-panel').style.display = 'none';
@@ -2264,7 +2272,7 @@ document.getElementById('next-month').addEventListener('click', () => {
       // 해당 주차가 목록에 없으면 자동 추가
       if (!weeklyWeeks.includes(monday)) {
         try {
-          await _sbOp(() => sb.from('weekly_weeks').insert({week_key: monday}));
+          await _sbOp(() => sbPost('weekly_weeks', {week_key: monday}));
         } catch(e) {}
       }
     }
