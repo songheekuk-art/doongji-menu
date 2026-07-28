@@ -158,29 +158,35 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 .btn-compare{width:100%;padding:10px;border-radius:10px;background:var(--surface-2);color:var(--brand);font-size:13px;font-weight:600;border:1px dashed var(--brand);cursor:pointer;transition:all .2s;margin-top:4px}
 .btn-compare:hover{background:var(--fm-bg)}
 
+/* ── Branding Items ── */
+.brand-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);margin-bottom:6px;transition:border-color .15s}
+.brand-item.has-qty{border-color:var(--pm);background:var(--pm-bg)}
+.brand-info{flex:1;min-width:0}
+.brand-name{font-size:13px;font-weight:600;color:var(--ink)}
+.brand-spec{font-size:11px;color:var(--ink-3)}
+.brand-price{font-size:13px;font-weight:700;color:var(--pm);white-space:nowrap;min-width:65px;text-align:right}
+.brand-price.free{color:var(--lm)}
+.brand-qty{width:60px!important;padding:6px 8px!important;text-align:center;font-size:13px;font-weight:600;border-radius:8px!important}
+.brand-subtotal{font-size:12px;font-weight:700;color:var(--pm);min-width:70px;text-align:right}
+
 /* Compare Modal */
-.cmp-overlay{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .25s;padding:16px}
-.cmp-overlay.open{opacity:1;pointer-events:auto}
-.cmp-modal{width:100%;max-width:720px;max-height:88vh;background:var(--surface);border-radius:16px;overflow:hidden;transform:scale(.95);transition:transform .3s}
-.cmp-overlay.open .cmp-modal{transform:scale(1)}
-.cmp-head{padding:20px 20px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line)}
-.cmp-head h2{font-size:18px;font-weight:700}
-.cmp-body{overflow-y:auto;max-height:calc(88vh - 70px);padding:0}
-.cmp-table{width:100%;border-collapse:collapse;font-size:13px}
-.cmp-table th,.cmp-table td{padding:10px 12px;text-align:left;border-bottom:1px solid #f1f5f9;vertical-align:top}
-.cmp-table thead th{background:#f8fafc;font-weight:600;color:var(--ink-2);position:sticky;top:0;z-index:1;font-size:12px}
-.cmp-table thead th:nth-child(2),.cmp-table thead th:nth-child(3){text-align:center;width:110px}
-.cmp-table td:nth-child(2),.cmp-table td:nth-child(3){text-align:center}
-.cmp-table .cat-row td{font-size:11px;font-weight:700;color:var(--brand);background:var(--fm-bg);letter-spacing:.5px}
-.badge-ok{display:inline-block;padding:2px 8px;border-radius:6px;background:#ECFDF5;color:#059669;font-weight:600;font-size:12px}
-.badge-paid{display:inline-block;padding:2px 8px;border-radius:6px;background:#FEF3C7;color:#D97706;font-weight:600;font-size:12px}
-.badge-no{display:inline-block;padding:2px 8px;border-radius:6px;background:#FEE2E2;color:#DC2626;font-weight:600;font-size:12px}
-.badge-free{display:inline-block;padding:2px 8px;border-radius:6px;background:#EBF3FD;color:var(--brand);font-weight:600;font-size:12px}
-.cmp-note{font-size:11px;color:var(--ink-3);margin-top:2px}
-.cmp-footer{padding:12px 20px;text-align:center;font-size:11px;color:var(--ink-3);border-top:1px solid var(--line);background:var(--surface-2)}
+
+/* ── Branding Items ── */
+.brand-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);margin-bottom:6px;transition:all .15s}
+.brand-item.checked{border-color:var(--pm);background:rgba(139,92,246,.04)}
+.brand-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;font-size:12px;color:transparent;cursor:pointer;transition:all .15s;flex:none}
+.brand-item.checked .brand-check{border-color:var(--pm);background:var(--pm);color:#fff}
+.brand-info{flex:1;min-width:0}
+.brand-name{font-size:13px;font-weight:600;color:var(--ink)}
+.brand-spec{font-size:11px;color:var(--ink-3)}
+.brand-price{font-size:13px;font-weight:700;color:var(--pm);white-space:nowrap}
+.brand-price.free{color:var(--lm)}
+.brand-qty{width:52px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:13px;text-align:center;flex:none}
+
+/* Compare Modal - removed */
 
 /* ── PDF Quote Template (hidden, used for export) ── */
-.pdf-quote{position:absolute;left:-9999px;top:0;width:700px;background:#fff;padding:40px;font-family:var(--font);color:var(--ink)}
+.pdf-quote{position:fixed;left:0;top:0;width:700px;background:#fff;padding:40px;font-family:var(--font);color:#16233a;z-index:-1;opacity:0;pointer-events:none}
 .pdf-quote .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid var(--brand);padding-bottom:16px;margin-bottom:24px}
 .pdf-quote .pdf-logo{font-size:22px;font-weight:800;color:var(--brand)}
 .pdf-quote .pdf-title{font-size:24px;font-weight:800;color:var(--ink);margin-bottom:16px}
@@ -303,22 +309,6 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
       </div>
     </div>
 
-    <!-- 2. Product Type -->
-    <div class="q-section">
-      <div class="q-section-title"><span class="ico">📦</span> 상품 유형 선택</div>
-      <div class="product-cards" id="productCards" style="grid-template-columns:repeat(2,1fr)">
-        <div class="p-card selected" data-product="standard" onclick="selectProduct('standard')">
-          <div class="p-name">기본 서비스</div>
-          <div class="p-desc">풀 서비스 · 월 50만원~</div>
-        </div>
-        <div class="p-card" data-product="light" onclick="selectProduct('light')">
-          <div class="p-name">라이트 서비스</div>
-          <div class="p-desc">핵심만 · 월 30만원~</div>
-        </div>
-      </div>
-      <button class="btn-compare" onclick="openCompare()">📊 기본 vs 라이트 서비스 비교하기</button>
-    </div>
-
     <!-- 3. Score & Base Price (Auto-calculated) -->
     <div class="q-section">
       <div class="q-section-title"><span class="ico">⭐</span> 점수 & 기본 관리비</div>
@@ -362,7 +352,25 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
       </div>
     </div>
 
-    <!-- 6. Discount / Memo -->
+    <!-- 6. Branding Items (hidden until branding option checked) -->
+    <div class="q-section" id="brandingSection" style="display:none">
+      <div class="q-section-title"><span class="ico">✨</span> 브랜딩 서비스 품목 선택</div>
+      <div style="padding:10px 14px;background:var(--pm-bg);border-radius:10px;margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <span style="font-size:13px;font-weight:600;color:var(--pm)">무상 제공 한도: ₩200,000</span>
+          <span style="font-size:13px;font-weight:700;color:var(--pm)" id="brandingUsed">₩0 사용</span>
+        </div>
+        <div style="height:8px;background:rgba(139,92,246,.15);border-radius:4px;overflow:hidden">
+          <div id="brandingBar" style="height:100%;background:var(--pm);border-radius:4px;transition:width .3s;width:0%"></div>
+        </div>
+        <div id="brandingOverMsg" style="font-size:11px;margin-top:4px;color:var(--ink-3)"></div>
+      </div>
+      <div id="brandingList"></div>
+      <div id="brandingTotal" style="margin-top:10px;padding:14px;background:var(--surface-2);border-radius:10px"></div>
+      <button class="btn-pdf" onclick="exportBrandingPDF()" style="background:var(--pm);margin-top:10px">✨ 브랜딩 품목 PDF 다운로드 (내부 공유용)</button>
+    </div>
+
+    <!-- 7. Discount / Memo -->
     <div class="q-section">
       <div class="q-section-title"><span class="ico">💬</span> 할인 & 메모</div>
       <div class="q-row">
@@ -402,20 +410,6 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 
 <!-- ═══ Service Detail Modal ═══ -->
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
-
-<!-- ═══ Compare Modal ═══ -->
-<div class="cmp-overlay" id="cmpOverlay" onclick="if(event.target===this)closeCompare()">
-  <div class="cmp-modal">
-    <div class="cmp-head">
-      <h2>📊 기본 vs 라이트 서비스 비교</h2>
-      <button class="modal-close" onclick="closeCompare()">✕</button>
-    </div>
-    <div class="cmp-body">
-      <table class="cmp-table" id="cmpTable"></table>
-    </div>
-    <div class="cmp-footer">※ 라이트 서비스는 핵심 시설관리 중심이며, 추가 항목은 건별 비용이 발생합니다.</div>
-  </div>
-</div>
 
 <!-- ═══ PDF Quote Template (hidden) ═══ -->
 <div class="pdf-quote" id="pdfQuote"></div>
@@ -610,15 +604,6 @@ const PRICING = {
       { min:11, max:13, price:1400000 },
       { min:14, max:15, price:1700000 },
     ]
-  },
-  light: {
-    label: "라이트 서비스",
-    tiers: [
-      { min:1, max:5, price:300000 },
-      { min:6, max:8, price:500000 },
-      { min:9, max:10, price:800000 },
-    ],
-    maxScore: 10
   }
 };
 
@@ -627,6 +612,7 @@ const OPTIONS = [
   { id:"admin", name:"행정 관리 서비스", desc:"임대료·관리비 청구, 미납 관리, 세금계산서 발행", price:200000 },
   { id:"hr", name:"관리인력 채용 및 관리감독", desc:"구인구직, 면접, 채용, 근태 관리 및 교육", price:100000, hasSalary:true },
   { id:"exclusive", name:"전용부(내부) 관리", desc:"원룸·고시원·통임차 등 소모품 교체 및 관리", price:200000 },
+  { id:"branding", name:"브랜딩 서비스", desc:"안내판·현판·게시판 등 건물 이미지 브랜딩 (20만원 한도 무상)", price:0, label:"품목 선택" },
   { id:"platform", name:"플랫폼 사용 (둥지OS)", desc:"임대인 대시보드, 임차인 포털", price:0, label:"현재 무료" },
 ];
 
@@ -761,6 +747,73 @@ function getScorePts(table, val){
   return table[table.length-1];
 }
 
+/* ═══════════════════════════════════════
+   BRANDING ITEMS (수정 가능 — 품목/가격)
+   ═══════════════════════════════════════ */
+const BRANDING = [
+  { id:"b1", spec:"A4 / 아크릴", name:"복도 내 적치물 금지", price:8000 },
+  { id:"b2", spec:"A4 / 아크릴", name:"금연 안내판", price:8000 },
+  { id:"b3", spec:"A4 / 아크릴", name:"CCTV 촬영 중", price:8000 },
+  { id:"b4", spec:"A4 / 아크릴", name:"관계자 외 출입금지", price:8000 },
+  { id:"b5", spec:"A4 / 아크릴", name:"지정주차안내판", price:8000 },
+  { id:"b6", spec:"A3 / 아크릴", name:"외부차량 주차금지", price:10000 },
+  { id:"b7", spec:"A3 / 아크릴", name:"쓰레기 투기 금지", price:10000 },
+  { id:"b8", spec:"A3 / 아크릴", name:"외부인 쓰레기 투기 절대금지", price:10000 },
+  { id:"b9", spec:"160×300 / 스티커", name:"소화전", price:0 },
+  { id:"b10", spec:"210×150 / 스티커", name:"배전함", price:0 },
+  { id:"b11", spec:"210×150 / 스티커", name:"VOC 고객센터", price:0 },
+  { id:"b12", spec:"250×250 / 아크릴", name:"둥지 현판", price:0 },
+  { id:"b13", spec:"760×480 / 게시판", name:"3구 게시판", price:74000 },
+  { id:"b14", spec:"450×700 / 아크릴", name:"임차 층별 안내판", price:40000 },
+];
+
+function renderBranding(){
+  const $list=document.getElementById("brandingList");
+  $list.innerHTML=BRANDING.map(b=>{
+    const isFree=b.price===0;
+    return `<div class="brand-item" data-id="${b.id}">
+      <div class="brand-info"><div class="brand-name">${b.name}</div><div class="brand-spec">${b.spec}</div></div>
+      <div class="brand-price${isFree?' free':''}">${isFree?'무료':'₩'+fmt(b.price)}</div>
+      <input type="number" class="brand-qty" min="0" value="0" data-bid="${b.id}" onchange="calcBranding()" oninput="calcBranding()"/>
+      <div class="brand-subtotal" data-bsub="${b.id}">–</div>
+    </div>`;
+  }).join("");
+}
+
+function calcBranding(){
+  let total=0;
+  BRANDING.forEach(b=>{
+    const qty=parseInt(document.querySelector(`[data-bid="${b.id}"]`).value)||0;
+    const sub=b.price*qty;
+    total+=sub;
+    const $item=document.querySelector(`[data-id="${b.id}"]`);
+    $item.classList.toggle("has-qty",qty>0);
+    document.querySelector(`[data-bsub="${b.id}"]`).textContent=qty>0?'₩'+fmt(sub):'–';
+  });
+  document.getElementById("brandingSum").textContent='₩'+fmt(total);
+  calcQuote();
+  return total;
+}
+
+function getBrandingTotal(){
+  let total=0;
+  BRANDING.forEach(b=>{
+    const el=document.querySelector(`[data-bid="${b.id}"]`);
+    if(el){ total+=b.price*(parseInt(el.value)||0); }
+  });
+  return total;
+}
+
+function getBrandingLines(){
+  const lines=[];
+  BRANDING.forEach(b=>{
+    const el=document.querySelector(`[data-bid="${b.id}"]`);
+    const qty=el?parseInt(el.value)||0:0;
+    if(qty>0 && b.price>0) lines.push({name:`${b.name} (${b.spec}) ×${qty}`,price:b.price*qty});
+  });
+  return lines;
+}
+
 function autoScore(){
   const area=parseInt(document.getElementById("qArea").value)||0;
   const tenants=parseInt(document.getElementById("qTenants").value)||0;
@@ -819,6 +872,12 @@ function toggleOption(id){
   selectedOptions[id]=!selectedOptions[id];
   document.querySelectorAll(".opt-item").forEach(el=>{el.classList.toggle("checked",!!selectedOptions[el.dataset.id])});
   document.getElementById("salarySection").style.display=selectedOptions.hr?"block":"none";
+  document.getElementById("brandingSection").style.display=selectedOptions.branding?"block":"none";
+  if(!selectedOptions.branding){
+    brandChecked={};
+    document.querySelectorAll(".brand-item").forEach(el=>{el.classList.remove("checked");el.querySelector(".brand-qty").style.display="none"});
+    calcBranding();
+  }
   calcQuote();
 }
 
@@ -878,7 +937,9 @@ function calcQuote(){
   emergencyText+=" (초과 시 1회당 ₩50,000)";
   document.getElementById("emergencyInfo").innerHTML="🚨 "+emergencyText;
 
-  // Total
+  // Total (monthly + branding one-time)
+  const brandTotal=getBrandingTotal();
+  const brandLines=getBrandingLines();
   const subtotal=(base||0)+optTotal;
   const afterDiscount=Math.max(0,subtotal-discount);
   const vat=vatMode==="include"?Math.round(afterDiscount*0.1):0;
@@ -890,6 +951,14 @@ function calcQuote(){
   if(discount>0) rows+=`<div class="total-row"><span>할인</span><span>-₩${fmt(discount)}</span></div>`;
   if(vat>0) rows+=`<div class="total-row"><span>부가세 (10%)</span><span>₩${fmt(vat)}</span></div>`;
   rows+=`<div class="total-row main"><span>월 합계 (VAT ${vatMode==="include"?"포함":"별도"})</span><span>₩${fmt(grandTotal)}</span></div>`;
+  if(brandTotal>0){
+    const brandOver=getBrandingOverAmount();
+    if(brandOver>0){
+      rows+=`<div class="total-row" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.15)"><span>✨ 브랜딩 실비정산 (1회성)</span><span style="color:#fca5a5">₩${fmt(brandOver)}</span></div>`;
+    } else {
+      rows+=`<div class="total-row" style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.15)"><span>✨ 브랜딩 (무상 한도 내)</span><span style="color:#86efac">₩0</span></div>`;
+    }
+  }
   $tb.innerHTML=rows;
 }
 
@@ -931,6 +1000,8 @@ function exportPDF(){
   const afterDiscount=Math.max(0,subtotal-discount);
   const vat=vatMode==="include"?Math.round(afterDiscount*0.1):0;
   const grandTotal=afterDiscount+vat;
+  const pdfBrandLines=getBrandingLines();
+  const pdfBrandTotal=getBrandingTotal();
 
   let itemRows=`<tr><td>기본 관리비 (${PRICING[selectedProduct].label}, ${score}점)</td><td style="text-align:right">₩${fmt(base||0)}</td></tr>`;
   optLines.forEach(l=>{itemRows+=`<tr><td>${l.name}</td><td style="text-align:right">₩${fmt(l.price)}</td></tr>`});
@@ -938,17 +1009,19 @@ function exportPDF(){
   if(vat>0) itemRows+=`<tr><td>부가세 (10%)</td><td style="text-align:right">₩${fmt(vat)}</td></tr>`;
 
   const $pdf=document.getElementById("pdfQuote");
+  $pdf.style.opacity="1";$pdf.style.zIndex="9998";
   $pdf.innerHTML=`
-    <div class="pdf-header">
-      <div><div class="pdf-logo">둥지 Doongji</div><div style="font-size:12px;color:#6b7280">중/소형 빌딩 전문 위탁관리</div><div style="font-size:11px;color:#9ca3af;margin-top:4px">1577-9489 · plat.doongji.co.kr</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #3B8CE4;padding-bottom:16px;margin-bottom:24px">
+      <div><div style="font-size:22px;font-weight:800;color:#3B8CE4">둥지 Doongji</div><div style="font-size:12px;color:#6b7280">중/소형 빌딩 전문 위탁관리</div><div style="font-size:11px;color:#9ca3af;margin-top:4px">1577-9489 · plat.doongji.co.kr</div></div>
       <div style="text-align:right"><div style="font-size:12px;color:#6b7280">견적일: ${today}</div></div>
     </div>
-    <div class="pdf-title">건물관리 서비스 견적서</div>
+    <div style="font-size:24px;font-weight:800;color:#16233a;margin-bottom:16px">건물관리 서비스 견적서</div>
     <table><tr><th style="width:140px">빌딩명</th><td>${bName}</td><th style="width:100px">건물주</th><td>${oName}</td></tr><tr><th>주소</th><td colspan="3">${addr}</td></tr><tr><th>연면적</th><td>${area}평</td><th>임차사 수</th><td>${tenants}개</td></tr><tr><th>사용승인일</th><td>${yr}년 (${age})</td><th>건물 점수</th><td>${score}점</td></tr></table>
     <div style="font-size:15px;font-weight:700;margin:20px 0 10px">서비스 내역</div>
-    <table><tr><th>항목</th><th style="text-align:right;width:160px">월 금액</th></tr>${itemRows}<tr style="background:#f0f7ff"><td style="font-weight:800;font-size:15px">월 합계 (VAT ${vatMode==="include"?"포함":"별도"})</td><td class="total-cell" style="text-align:right">₩${fmt(grandTotal)}</td></tr></table>
+    <table><tr><th>항목</th><th style="text-align:right;width:160px">월 금액</th></tr>${itemRows}<tr style="background:#f0f7ff"><td style="font-weight:800;font-size:15px">월 합계 (VAT ${vatMode==="include"?"포함":"별도"})</td><td style="text-align:right;font-weight:800;font-size:16px;color:#3B8CE4">₩${fmt(grandTotal)}</td></tr></table>
+    ${pdfBrandLines.length>0?`<div style="font-size:15px;font-weight:700;margin:20px 0 10px">✨ 브랜딩 품목 (1회성)</div><table><tr><th>품목</th><th style="text-align:center;width:60px">수량</th><th style="text-align:right;width:120px">금액</th></tr>${pdfBrandLines.map(l=>`<tr><td>${l.name} <span style="color:#9ca3af;font-size:11px">${l.spec}</span></td><td style="text-align:center">${l.qty}</td><td style="text-align:right">₩${fmt(l.sub)}</td></tr>`).join("")}<tr style="background:#f3f0ff"><td colspan="2" style="font-weight:800">브랜딩 합계 (무상 한도 ₩200,000)</td><td style="text-align:right;font-weight:800;font-size:16px;color:#8B5CF6">₩${fmt(pdfBrandTotal)}${pdfBrandTotal>200000?' → 실비 ₩'+fmt(pdfBrandTotal-200000):''}</td></tr></table>`:""}
     ${memo?`<div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px;font-size:12px"><strong>비고:</strong> ${memo}</div>`:""}
-    <div class="pdf-footer">
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;text-align:center">
       <p>본 견적서는 발행일로부터 30일간 유효합니다.</p>
       <p style="margin-top:4px">㈜컨텍터스 · 둥지 | 서울특별시 | 대표전화 1577-9489</p>
     </div>
@@ -960,67 +1033,199 @@ function exportPDF(){
     image:{type:"jpeg",quality:0.98},
     html2canvas:{scale:2,useCORS:true},
     jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
-  }).from($pdf).save();
+  }).from($pdf).save().then(()=>{$pdf.style.opacity="0";$pdf.style.zIndex="-1"});
 }
 
 /* ═══════════════════════════════════════
-   COMPARE: 기본 vs 라이트 (수정 가능)
-   status: ok=포함, paid=비용발생, no=불가능, free=무료
+   BRANDING ITEMS (수정 가능)
    ═══════════════════════════════════════ */
-const CMP_DATA = [
-  { cat:"시설관리" },
-  { name:"정기방문", std:"월 1회", stdS:"ok", lite:"월 1회", liteS:"ok", cost:"", note:"" },
-  { name:"플랫폼 제공", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"" },
-  { name:"정기방문 외 방문", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"1회당 5만원", note:"제한없음 / 50분 내" },
-  { name:"24시간 긴급 출동", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"1회당 10만원", note:"제한없음 / 50분 내" },
-  { name:"브랜딩", std:"무료 제공", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"1회당 20만원", note:"기본: 전체 무료 / 라이트: 현판만 무료" },
-  { name:"공사 견적 산출 및 제안", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"우수협력업체 소개 가능" },
-  { name:"공사 현장 확인 (시작/끝)", std:"O", stdS:"ok", lite:"불가능", liteS:"no", cost:"", note:"우수협력업체 소개 가능" },
-  { name:"입/퇴실 관리 및 원상복구 확인", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"프로젝트당 10만원", note:"전기, 수도, 가스 계약자 확인" },
-  { name:"파트너사 관리", std:"O", stdS:"ok", lite:"불가능", liteS:"no", cost:"", note:"" },
-  { name:"옵션 서비스 선택", std:"O", stdS:"ok", lite:"불가능", liteS:"no", cost:"", note:"" },
-  { name:"법적 의무교육 기록관리", std:"O", stdS:"ok", lite:"불가능", liteS:"no", cost:"", note:"" },
-  { name:"월간 레포트", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"" },
-  { name:"내용증명 작성", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"별도", note:"행정서비스" },
-  { name:"임대차 계약 관리 (중개법인)", std:"O", stdS:"ok", lite:"비용 발생", liteS:"paid", cost:"별도", note:"중개서비스" },
-  { name:"물리보안 컨설팅", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"" },
-  { name:"보험 접수 및 청구", std:"O", stdS:"ok", lite:"가능", liteS:"ok", cost:"", note:"" },
-  { cat:"자산관리" },
-  { name:"플랫폼 이슈 관리 & 방문 기록", std:"O", stdS:"ok", lite:"무료", liteS:"free", cost:"", note:"" },
-  { name:"월간 리포트 (대면 2개월 1회)", std:"O", stdS:"ok", lite:"무료", liteS:"free", cost:"", note:"" },
+const BRAND_LIMIT = 200000; // 무상 한도
+
+const BRAND_ITEMS = [
+  { id:"b1", spec:"A4 / 아크릴", name:"복도 내 적치물 금지", price:8000 },
+  { id:"b2", spec:"A4 / 아크릴", name:"금연 안내판", price:8000 },
+  { id:"b3", spec:"A4 / 아크릴", name:"CCTV 촬영 중", price:8000 },
+  { id:"b4", spec:"A4 / 아크릴", name:"관계자 외 출입금지", price:8000 },
+  { id:"b5", spec:"A4 / 아크릴", name:"지정주차 안내판", price:8000 },
+  { id:"b6", spec:"A3 / 아크릴", name:"외부차량 주차금지", price:10000 },
+  { id:"b7", spec:"A3 / 아크릴", name:"쓰레기 투기 금지", price:10000 },
+  { id:"b8", spec:"A3 / 아크릴", name:"외부인 쓰레기 투기 절대금지", price:10000 },
+  { id:"b9", spec:"160×300 / 스티커", name:"소화전", price:0 },
+  { id:"b10", spec:"210×150 / 스티커", name:"배전함", price:0 },
+  { id:"b11", spec:"210×150 / 스티커", name:"VOC 고객센터", price:0 },
+  { id:"b12", spec:"250×250 / 아크릴", name:"둥지 현판", price:0 },
+  { id:"b13", spec:"760×480 / 게시판", name:"3구 게시판", price:74000 },
+  { id:"b14", spec:"450×700 / 아크릴", name:"임차 층별 안내판", price:40000 },
 ];
 
-function badgeHTML(status, text){
-  if(status==="ok") return `<span class="badge-ok">${text||'포함'}</span>`;
-  if(status==="paid") return `<span class="badge-paid">${text||'유료'}</span>`;
-  if(status==="no") return `<span class="badge-no">${text||'불가'}</span>`;
-  if(status==="free") return `<span class="badge-free">${text||'무료'}</span>`;
-  return text||"";
+let brandChecked = {};
+
+function renderBranding(){
+  const $list = document.getElementById("brandingList");
+  $list.innerHTML = BRAND_ITEMS.map(item => {
+    const isFree = item.price === 0;
+    const priceLabel = isFree ? "무료" : `₩${fmt(item.price)}`;
+    const priceClass = isFree ? "brand-price free" : "brand-price";
+    return `<div class="brand-item" data-bid="${item.id}">
+      <div class="brand-check" onclick="toggleBrand('${item.id}')">✓</div>
+      <div class="brand-info">
+        <div class="brand-name">${item.name}</div>
+        <div class="brand-spec">${item.spec}</div>
+      </div>
+      <span class="${priceClass}">${priceLabel}</span>
+      <input type="number" class="brand-qty" data-bid="${item.id}" value="1" min="1" max="99" onchange="calcBranding()" oninput="calcBranding()" style="display:none"/>
+    </div>`;
+  }).join("");
 }
 
-function renderCompare(){
-  let html=`<thead><tr><th style="width:40%">항목</th><th>기본 서비스</th><th>라이트 서비스</th><th style="width:22%">비용 / 비고</th></tr></thead><tbody>`;
-  CMP_DATA.forEach(r=>{
-    if(r.cat){
-      html+=`<tr class="cat-row"><td colspan="4">📌 ${r.cat}</td></tr>`;
-    } else {
-      const costNote=[r.cost,r.note].filter(Boolean).join(' · ');
-      html+=`<tr><td>${r.name}</td><td>${badgeHTML(r.stdS,r.std)}</td><td>${badgeHTML(r.liteS,r.lite)}</td><td style="font-size:11px;color:var(--ink-2)">${costNote}</td></tr>`;
-    }
+function toggleBrand(id){
+  brandChecked[id] = !brandChecked[id];
+  document.querySelectorAll(".brand-item").forEach(el => {
+    const bid = el.dataset.bid;
+    el.classList.toggle("checked", !!brandChecked[bid]);
+    el.querySelector(".brand-qty").style.display = brandChecked[bid] ? "block" : "none";
   });
-  html+=`<tr style="background:#f0f7ff;font-weight:700"><td>최소 월 비용</td><td style="text-align:center;color:var(--brand)">50만원~</td><td style="text-align:center;color:var(--lm)">30만원~</td><td></td></tr>`;
-  html+=`</tbody>`;
-  document.getElementById("cmpTable").innerHTML=html;
+  calcBranding();
 }
 
-function openCompare(){
-  renderCompare();
-  document.getElementById("cmpOverlay").classList.add("open");
-  document.body.style.overflow="hidden";
+function calcBranding(){
+  let total = 0;
+  let lines = [];
+  BRAND_ITEMS.forEach(item => {
+    if (!brandChecked[item.id]) return;
+    const qtyEl = document.querySelector(`.brand-qty[data-bid="${item.id}"]`);
+    const qty = parseInt(qtyEl?.value) || 1;
+    const sub = item.price * qty;
+    total += sub;
+    if (item.price > 0) lines.push({ name: item.name, qty, sub });
+  });
+
+  // Budget bar
+  const pct = Math.min(100, (total / BRAND_LIMIT) * 100);
+  document.getElementById("brandingBar").style.width = pct + "%";
+  document.getElementById("brandingBar").style.background = total > BRAND_LIMIT ? "#DC2626" : "var(--pm)";
+  document.getElementById("brandingUsed").textContent = `₩${fmt(total)} 사용`;
+
+  // Over message
+  const $msg = document.getElementById("brandingOverMsg");
+  if (total > BRAND_LIMIT) {
+    const over = total - BRAND_LIMIT;
+    $msg.innerHTML = `⚠️ 한도 초과 <strong style="color:#DC2626">₩${fmt(over)}</strong> → 실비정산 대상`;
+  } else if (total > 0) {
+    $msg.textContent = `잔여 한도: ₩${fmt(BRAND_LIMIT - total)}`;
+  } else {
+    $msg.textContent = "";
+  }
+
+  // Total summary
+  const $total = document.getElementById("brandingTotal");
+  if (total === 0) {
+    $total.innerHTML = `<div style="text-align:center;font-size:13px;color:var(--ink-3)">품목을 선택하세요</div>`;
+  } else {
+    const withinLimit = Math.min(total, BRAND_LIMIT);
+    const overAmount = Math.max(0, total - BRAND_LIMIT);
+    let html = `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;color:var(--ink-2)">선택 품목 합계</span><span style="font-size:15px;font-weight:700;color:var(--pm)">₩${fmt(total)}</span></div>`;
+    html += `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px;color:var(--lm)">무상 제공 (한도 내)</span><span style="font-size:13px;font-weight:600;color:var(--lm)">-₩${fmt(withinLimit)}</span></div>`;
+    if (overAmount > 0) {
+      html += `<div style="display:flex;justify-content:space-between;padding-top:6px;border-top:1px solid var(--line)"><span style="font-size:14px;font-weight:700;color:#DC2626">실비정산 금액</span><span style="font-size:16px;font-weight:800;color:#DC2626">₩${fmt(overAmount)}</span></div>`;
+    } else {
+      html += `<div style="display:flex;justify-content:space-between;padding-top:6px;border-top:1px solid var(--line)"><span style="font-size:14px;font-weight:700;color:var(--lm)">추가 비용</span><span style="font-size:16px;font-weight:800;color:var(--lm)">₩0</span></div>`;
+    }
+    $total.innerHTML = html;
+  }
+
+  calcQuote();
 }
-function closeCompare(){
-  document.getElementById("cmpOverlay").classList.remove("open");
-  document.body.style.overflow="";
+
+function getBrandingOverAmount(){
+  return Math.max(0, getBrandingTotal() - BRAND_LIMIT);
+}
+
+function getBrandingTotal(){
+  let total = 0;
+  BRAND_ITEMS.forEach(item => {
+    if (!brandChecked[item.id]) return;
+    const qtyEl = document.querySelector(`.brand-qty[data-bid="${item.id}"]`);
+    const qty = parseInt(qtyEl?.value) || 1;
+    total += item.price * qty;
+  });
+  return total;
+}
+
+function getBrandingLines(){
+  let lines = [];
+  BRAND_ITEMS.forEach(item => {
+    if (!brandChecked[item.id]) return;
+    const qtyEl = document.querySelector(`.brand-qty[data-bid="${item.id}"]`);
+    const qty = parseInt(qtyEl?.value) || 1;
+    lines.push({ name: item.name, spec: item.spec, qty, unitPrice: item.price, sub: item.price * qty });
+  });
+  return lines;
+}
+
+/* ═══════════════════════════════════════
+   BRANDING PDF EXPORT
+   ═══════════════════════════════════════ */
+function exportBrandingPDF(){
+  const lines = getBrandingLines();
+  const bName = document.getElementById("qBldgName").value || "–";
+  const addr = document.getElementById("qAddr").value || "–";
+  const today = new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric"});
+  const total = getBrandingTotal();
+  const withinLimit = Math.min(total, BRAND_LIMIT);
+  const overAmount = Math.max(0, total - BRAND_LIMIT);
+
+  // Count all selected (including free)
+  const allSelected = [];
+  BRAND_ITEMS.forEach(item => {
+    if (!brandChecked[item.id]) return;
+    const qtyEl = document.querySelector(`.brand-qty[data-bid="${item.id}"]`);
+    const qty = parseInt(qtyEl?.value) || 1;
+    allSelected.push({ name: item.name, spec: item.spec, qty, unitPrice: item.price, sub: item.price * qty });
+  });
+
+  if(allSelected.length === 0){ alert("선택된 브랜딩 품목이 없습니다."); return; }
+
+  let rows = allSelected.map((l,i) =>
+    `<tr><td style="text-align:center">${i+1}</td><td>${l.name}</td><td>${l.spec}</td><td style="text-align:center">${l.qty}</td><td style="text-align:right">${l.unitPrice>0?'₩'+fmt(l.unitPrice):'무료'}</td><td style="text-align:right;font-weight:600">${l.sub>0?'₩'+fmt(l.sub):'무료'}</td></tr>`
+  ).join("");
+
+  const $pdf = document.getElementById("pdfQuote");
+  $pdf.style.opacity="1";$pdf.style.zIndex="9998";
+  $pdf.innerHTML = `
+    <div style="border-bottom:3px solid #8B5CF6;padding-bottom:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div style="font-size:22px;font-weight:800;color:#8B5CF6">둥지 Doongji</div>
+        <div style="font-size:12px;color:#6b7280;margin-top:2px">브랜딩 서비스 품목 내역서</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:12px;color:#6b7280">작성일: ${today}</div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px">내부 공유용</div>
+      </div>
+    </div>
+    <table style="margin-bottom:16px"><tr><th style="width:100px">빌딩명</th><td>${bName}</td><th style="width:80px">주소</th><td>${addr}</td></tr></table>
+    <div style="font-size:15px;font-weight:700;margin:20px 0 10px">선택 품목 내역</div>
+    <table>
+      <tr><th style="width:40px;text-align:center">No</th><th>품목</th><th style="width:130px">사이즈/종류</th><th style="width:50px;text-align:center">수량</th><th style="width:90px;text-align:right">단가</th><th style="width:100px;text-align:right">소계</th></tr>
+      ${rows}
+    </table>
+    <div style="margin-top:16px;padding:16px;background:#f8fafc;border-radius:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px">선택 품목 합계</span><span style="font-size:15px;font-weight:700;color:#8B5CF6">₩${fmt(total)}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-size:13px;color:#059669">무상 제공 한도 (₩${fmt(BRAND_LIMIT)})</span><span style="font-size:13px;font-weight:600;color:#059669">-₩${fmt(withinLimit)}</span></div>
+      <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #e5e7eb"><span style="font-size:14px;font-weight:700;${overAmount>0?'color:#dc2626':'color:#059669'}">${overAmount>0?'실비정산 금액':'추가 비용'}</span><span style="font-size:18px;font-weight:800;${overAmount>0?'color:#dc2626':'color:#059669'}">₩${fmt(overAmount)}</span></div>
+    </div>
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;text-align:center">
+      <p>㈜컨텍터스 · 둥지 | 1577-9489 | 내부 공유 문서</p>
+    </div>
+  `;
+
+  html2pdf().set({
+    margin:[10,10,10,10],
+    filename:'둥지_브랜딩_품목_'+bName+'_'+today+'.pdf',
+    image:{type:"jpeg",quality:0.98},
+    html2canvas:{scale:2,useCORS:true},
+    jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}
+  }).from($pdf).save().then(()=>{$pdf.style.opacity="0";$pdf.style.zIndex="-1"});
 }
 
 /* ═══════════════════════════════════════
@@ -1029,6 +1234,7 @@ function closeCompare(){
 renderTabs();
 renderContent();
 renderOptions();
+renderBranding();
 autoScore();
 calcQuote();
 </script>
