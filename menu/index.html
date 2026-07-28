@@ -742,15 +742,15 @@ let bldgIdCounter = 1;
 function addBuilding(){
   bldgIdCounter++;
   buildings.push({ id:bldgIdCounter, name:"", area:0, tenants:0, year:0, addr:"" });
-  renderBuildings();
-  checkDiscount();
+  renderBuildings(); // 가격 계산 먼저
+  setTimeout(()=>checkDiscount(), 50); // 합산 완료 후 할인 적용
 }
 
 function removeBuilding(id){
   if(buildings.length <= 1) return;
   buildings = buildings.filter(b => b.id !== id);
   renderBuildings();
-  checkDiscount();
+  setTimeout(()=>checkDiscount(), 50);
 }
 
 function renderBuildings(){
@@ -810,6 +810,8 @@ function calcAllBuildings(){
       <span style="font-size:14px;font-weight:600;color:var(--brand)">${buildings.length}건 합산 기본 관리비</span>
       <span style="font-size:22px;font-weight:800;color:var(--brand)">₩${fmt(combinedTotal)}</span>
     </div>`;
+    // 합산 변경 시 할인 금액도 재계산
+    applyDiscountPct();
   } else {
     $sub.innerHTML = "";
   }
@@ -861,11 +863,8 @@ function checkDiscount(){
     return `<button class="disc-btn${isRec?' active':''}" onclick="selectDiscount(${pct})"><span class="pct">${pct}%</span><br>${t.label}</button>`;
   }).join("") + `<button class="disc-btn" onclick="selectDiscount(0)">직접 입력</button>`;
 
-  const currentPct = parseInt(document.getElementById("qDiscountPct").value) || 0;
-  if(currentPct === 0) selectDiscount(recPct);
-  else applyDiscountPct(); // 건물 변경 시 항상 금액 재계산
-
-  calcQuote();
+  // 건물 수 변경 시 항상 추천 할인율 적용
+  selectDiscount(recPct);
 }
 
 function selectDiscount(pct){
