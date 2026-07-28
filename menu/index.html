@@ -183,6 +183,12 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 .brand-price.free{color:var(--lm)}
 .brand-qty{width:52px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:13px;text-align:center;flex:none}
 
+/* ── Discount Buttons ── */
+.disc-btn{padding:8px 16px;border-radius:8px;border:2px solid var(--line);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:var(--surface);color:var(--ink)}
+.disc-btn:hover{border-color:var(--lm)}
+.disc-btn.active{border-color:var(--lm);background:#ECFDF5;color:#059669}
+.disc-btn .pct{font-size:16px;font-weight:800}
+
 /* Compare Modal - removed */
 
 /* ── PDF Quote Template (hidden, used for export) ── */
@@ -307,6 +313,10 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
         <div class="q-field"><label>사용승인일 (연도)</label><input type="number" id="qYear" placeholder="예: 2013" oninput="autoScore()"/></div>
         <div class="q-field"><label>건물 주소</label><input type="text" id="qAddr" placeholder="예: 서울시 강서구..."/></div>
       </div>
+      <div class="q-row">
+        <div class="q-field"><label>관리 건물 수</label><input type="number" id="qBldgCount" value="1" min="1" max="20" oninput="checkDiscount()" onchange="checkDiscount()"/></div>
+        <div class="q-field"></div>
+      </div>
     </div>
 
     <!-- 3. Score & Base Price (Auto-calculated) -->
@@ -370,12 +380,29 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
       <button class="btn-pdf" onclick="exportBrandingPDF()" style="background:var(--pm);margin-top:10px">✨ 브랜딩 품목 PDF 다운로드 (내부 공유용)</button>
     </div>
 
-    <!-- 7. Discount / Memo -->
-    <div class="q-section">
-      <div class="q-section-title"><span class="ico">💬</span> 할인 & 메모</div>
+    <!-- 7. Multi-building Discount (hidden when 1 building) -->
+    <div class="q-section" id="discountSection" style="display:none">
+      <div class="q-section-title"><span class="ico">🏢</span> 다건물 할인</div>
+      <div id="discountBadge" style="padding:10px 14px;background:#ECFDF5;border-radius:10px;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:20px">🎉</span>
+        <span style="font-size:13px;font-weight:600;color:#059669" id="discountBadgeText">2건 이상 관리 시 할인이 적용됩니다</span>
+      </div>
+      <div style="margin-bottom:12px">
+        <label>추천 할인율 선택</label>
+        <div style="display:flex;gap:8px;margin-top:6px" id="discountBtns"></div>
+      </div>
       <div class="q-row">
-        <div class="q-field"><label>할인 금액 (원)</label><input type="number" id="qDiscount" value="0" onchange="calcQuote()" oninput="calcQuote()"/></div>
+        <div class="q-field"><label>할인율 (%)</label><input type="number" id="qDiscountPct" value="0" min="0" max="50" oninput="applyDiscountPct()" onchange="applyDiscountPct()"/></div>
+        <div class="q-field"><label>할인 금액 (자동계산, 수정 가능)</label><input type="number" id="qDiscount" value="0" onchange="calcQuote()" oninput="calcQuote()"/></div>
+      </div>
+    </div>
+
+    <!-- 8. VAT & Memo -->
+    <div class="q-section">
+      <div class="q-section-title"><span class="ico">💬</span> 부가세 & 메모</div>
+      <div class="q-row">
         <div class="q-field"><label>부가세</label><select id="qVat" onchange="calcQuote()"><option value="exclude">별도</option><option value="include">포함</option></select></div>
+        <div class="q-field"></div>
       </div>
       <div class="q-row full">
         <div class="q-field"><label>비고 / 특이사항</label><input type="text" id="qMemo" placeholder="예: 동결로 1차 제안, 장기 연체 건물 등"/></div>
@@ -716,6 +743,69 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
 /* ═══════════════════════════════════════
    QUOTE GENERATOR
    ═══════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   MULTI-BUILDING DISCOUNT (수정 가능)
+   ═══════════════════════════════════════ */
+const DISCOUNT_TIERS = [
+  { minBldg:2, pct:5, label:"2건" },
+  { minBldg:3, pct:10, label:"3건" },
+  { minBldg:4, pct:15, label:"4건+" },
+];
+
+function checkDiscount(){
+  const count = parseInt(document.getElementById("qBldgCount").value) || 1;
+  const $section = document.getElementById("discountSection");
+  const $badge = document.getElementById("discountBadgeText");
+  const $btns = document.getElementById("discountBtns");
+
+  if(count < 2){
+    $section.style.display = "none";
+    document.getElementById("qDiscount").value = 0;
+    document.getElementById("qDiscountPct").value = 0;
+    calcQuote();
+    return;
+  }
+
+  $section.style.display = "block";
+  $badge.textContent = `${count}건 관리 — 다건물 할인이 적용됩니다!`;
+
+  // Render discount buttons
+  const recommended = DISCOUNT_TIERS.find(t => count >= t.minBldg);
+  let recPct = recommended ? recommended.pct : 5;
+  // For 4+ buildings, scale up
+  if(count >= 5) recPct = 20;
+
+  $btns.innerHTML = DISCOUNT_TIERS.map(t => {
+    let pct = t.pct;
+    if(t.minBldg === 4 && count >= 5) pct = 20;
+    const isMatch = count >= t.minBldg && (DISCOUNT_TIERS.find(n => n.minBldg > t.minBldg && count >= n.minBldg) === undefined || t.minBldg === 4);
+    return `<button class="disc-btn${isMatch?' active':''}" onclick="selectDiscount(${pct})"><span class="pct">${pct}%</span><br>${t.label}</button>`;
+  }).join("") + `<button class="disc-btn" onclick="selectDiscount(0)">직접 입력</button>`;
+
+  // Auto-select recommended discount
+  const currentPct = parseInt(document.getElementById("qDiscountPct").value) || 0;
+  if(currentPct === 0) selectDiscount(recPct);
+
+  calcQuote();
+}
+
+function selectDiscount(pct){
+  document.getElementById("qDiscountPct").value = pct;
+  document.querySelectorAll(".disc-btn").forEach(b => b.classList.remove("active"));
+  applyDiscountPct();
+}
+
+function applyDiscountPct(){
+  const pct = parseFloat(document.getElementById("qDiscountPct").value) || 0;
+  const score = parseInt(document.getElementById("qScore").value) || 1;
+  const base = getBasePrice(score) || 0;
+
+  // Calculate discount on base price
+  const discountAmt = Math.round(base * pct / 100);
+  document.getElementById("qDiscount").value = discountAmt;
+  calcQuote();
+}
+
 /* ═══════════════════════════════════════
    AUTO SCORING (수정 가능 — 점수 기준표)
    연면적 + 임차사 수 + 건물 연식 = 총 점수
