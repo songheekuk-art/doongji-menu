@@ -863,6 +863,7 @@ function checkDiscount(){
 
   const currentPct = parseInt(document.getElementById("qDiscountPct").value) || 0;
   if(currentPct === 0) selectDiscount(recPct);
+  else applyDiscountPct(); // 건물 변경 시 항상 금액 재계산
 
   calcQuote();
 }
