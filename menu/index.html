@@ -184,6 +184,18 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 .brand-qty{width:52px;padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:13px;text-align:center;flex:none}
 
 /* ── Discount Buttons ── */
+.bldg-card{background:var(--surface-2);border-radius:12px;padding:16px;margin-bottom:10px;border:1px solid var(--line);position:relative}
+.bldg-card .bldg-num{position:absolute;top:-8px;left:12px;background:var(--brand);color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:10px}
+.bldg-card .bldg-remove{position:absolute;top:8px;right:8px;width:24px;height:24px;border-radius:12px;background:#FEE2E2;color:#DC2626;border:none;cursor:pointer;font-size:12px;display:grid;place-items:center}
+.bldg-card .bldg-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.bldg-card .bldg-row.r2{grid-template-columns:1fr 1fr}
+.bldg-card input,.bldg-card select{padding:8px 10px;font-size:13px;border-radius:8px}
+.bldg-card label{font-size:11px;margin-bottom:2px}
+.bldg-price-tag{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding:8px 12px;background:var(--fm-bg);border-radius:8px}
+.bldg-price-tag .score{font-size:13px;color:var(--ink-2)}
+.bldg-price-tag .price{font-size:17px;font-weight:800;color:var(--brand)}
+
+/* ── Discount Buttons ── */
 .disc-btn{padding:8px 16px;border-radius:8px;border:2px solid var(--line);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;background:var(--surface);color:var(--ink)}
 .disc-btn:hover{border-color:var(--lm)}
 .disc-btn.active{border-color:var(--lm);background:#ECFDF5;color:#059669}
@@ -298,43 +310,21 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 <div class="page" id="pageQuote">
   <div class="quote-wrap">
 
-    <!-- 1. Building Info -->
+    <!-- 1. Owner Info -->
     <div class="q-section">
-      <div class="q-section-title"><span class="ico">🏢</span> 건물 정보</div>
+      <div class="q-section-title"><span class="ico">👤</span> 고객 정보</div>
       <div class="q-row">
-        <div class="q-field"><label>빌딩명</label><input type="text" id="qBldgName" placeholder="예: SS빌딩"/></div>
         <div class="q-field"><label>건물주명</label><input type="text" id="qOwnerName" placeholder="예: 홍길동"/></div>
-      </div>
-      <div class="q-row">
-        <div class="q-field"><label>연면적 (평)</label><input type="number" id="qArea" placeholder="예: 300" oninput="autoScore()"/></div>
-        <div class="q-field"><label>임차사 수</label><input type="number" id="qTenants" placeholder="예: 7" oninput="autoScore()"/></div>
-      </div>
-      <div class="q-row">
-        <div class="q-field"><label>사용승인일 (연도)</label><input type="number" id="qYear" placeholder="예: 2013" oninput="autoScore()"/></div>
-        <div class="q-field"><label>건물 주소</label><input type="text" id="qAddr" placeholder="예: 서울시 강서구..."/></div>
-      </div>
-      <div class="q-row">
-        <div class="q-field"><label>관리 건물 수</label><input type="number" id="qBldgCount" value="1" min="1" max="20" oninput="checkDiscount()" onchange="checkDiscount()"/></div>
-        <div class="q-field"></div>
+        <div class="q-field"><label>연락처</label><input type="text" id="qOwnerPhone" placeholder="예: 010-1234-5678"/></div>
       </div>
     </div>
 
-    <!-- 3. Score & Base Price (Auto-calculated) -->
+    <!-- 2. Multi-Building List -->
     <div class="q-section">
-      <div class="q-section-title"><span class="ico">⭐</span> 점수 & 기본 관리비</div>
-      <div id="scoreBreakdown" style="margin-bottom:14px"></div>
-      <div class="q-row">
-        <div class="q-field">
-          <label>건물 점수 (자동산출, 수정 가능)</label>
-          <input type="number" id="qScore" min="1" max="15" value="3" onchange="calcQuote()" oninput="calcQuote()"/>
-        </div>
-        <div class="q-field">
-          <label>기본 관리비 (자동계산)</label>
-          <input type="text" id="qBasePrice" readonly style="background:#f0f3f8;font-weight:700;color:var(--brand)"/>
-        </div>
-      </div>
-      <div class="score-display" id="scoreDisplay"></div>
-      <p style="font-size:11px;color:var(--ink-3);margin-top:4px">* 점수는 연면적·임차사 수·건물 연식을 기반으로 자동 산출되며, 직접 수정도 가능합니다.</p>
+      <div class="q-section-title"><span class="ico">🏢</span> 관리 건물 목록</div>
+      <div id="buildingList"></div>
+      <button onclick="addBuilding()" style="width:100%;padding:12px;border-radius:10px;border:2px dashed var(--brand);background:transparent;color:var(--brand);font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:background .15s" onmouseover="this.style.background='#EBF3FD'" onmouseout="this.style.background='transparent'">+ 건물 추가</button>
+      <div id="buildingSubtotal" style="margin-top:12px"></div>
     </div>
 
     <!-- 4. Options -->
@@ -744,6 +734,96 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
    QUOTE GENERATOR
    ═══════════════════════════════════════ */
 /* ═══════════════════════════════════════
+   MULTI-BUILDING SYSTEM
+   ═══════════════════════════════════════ */
+let buildings = [{ id:1, name:"", area:0, tenants:0, year:0, addr:"" }];
+let bldgIdCounter = 1;
+
+function addBuilding(){
+  bldgIdCounter++;
+  buildings.push({ id:bldgIdCounter, name:"", area:0, tenants:0, year:0, addr:"" });
+  renderBuildings();
+  checkDiscount();
+}
+
+function removeBuilding(id){
+  if(buildings.length <= 1) return;
+  buildings = buildings.filter(b => b.id !== id);
+  renderBuildings();
+  checkDiscount();
+}
+
+function renderBuildings(){
+  const $list = document.getElementById("buildingList");
+  $list.innerHTML = buildings.map((b, i) => `
+    <div class="bldg-card" data-bid="${b.id}">
+      <span class="bldg-num">건물 ${i+1}</span>
+      ${buildings.length > 1 ? `<button class="bldg-remove" onclick="removeBuilding(${b.id})">✕</button>` : ''}
+      <div class="bldg-row r2" style="margin-top:14px">
+        <div class="q-field"><label>빌딩명</label><input type="text" value="${b.name}" placeholder="예: SS빌딩" onchange="updateBldg(${b.id},'name',this.value);calcAllBuildings()"/></div>
+        <div class="q-field"><label>주소</label><input type="text" value="${b.addr}" placeholder="예: 서울시 강서구..." onchange="updateBldg(${b.id},'addr',this.value)"/></div>
+      </div>
+      <div class="bldg-row">
+        <div class="q-field"><label>연면적 (평)</label><input type="number" value="${b.area||''}" placeholder="300" oninput="updateBldg(${b.id},'area',this.value);calcAllBuildings()"/></div>
+        <div class="q-field"><label>임차사 수</label><input type="number" value="${b.tenants||''}" placeholder="7" oninput="updateBldg(${b.id},'tenants',this.value);calcAllBuildings()"/></div>
+        <div class="q-field"><label>사용승인 (연도)</label><input type="number" value="${b.year||''}" placeholder="2013" oninput="updateBldg(${b.id},'year',this.value);calcAllBuildings()"/></div>
+      </div>
+      <div class="bldg-price-tag" id="bldgPrice_${b.id}"><span class="score">점수 계산 중...</span><span class="price">–</span></div>
+    </div>
+  `).join("");
+  calcAllBuildings();
+}
+
+function updateBldg(id, field, val){
+  const b = buildings.find(x => x.id === id);
+  if(b) b[field] = field==='name'||field==='addr' ? val : parseInt(val)||0;
+}
+
+function calcBldgScore(b){
+  const area = b.area || 0;
+  const tenants = b.tenants || 0;
+  const age = b.year > 0 ? (new Date().getFullYear() - b.year) : 0;
+  const areaRow = getScorePts(SCORE_AREA, area);
+  const tenantRow = getScorePts(SCORE_TENANTS, tenants);
+  const ageRow = getScorePts(SCORE_AGE, age);
+  return Math.min(15, Math.max(1, areaRow.pts + tenantRow.pts + ageRow.pts));
+}
+
+function calcAllBuildings(){
+  let combinedTotal = 0;
+  buildings.forEach(b => {
+    const score = calcBldgScore(b);
+    const price = getBasePrice(score) || 0;
+    b._score = score;
+    b._price = price;
+    combinedTotal += price;
+    const $tag = document.getElementById(`bldgPrice_${b.id}`);
+    if($tag){
+      $tag.innerHTML = `<span class="score">${score}점 · ${getTierLabel(score)}</span><span class="price">₩${fmt(price)}</span>`;
+    }
+  });
+
+  // Subtotal display
+  const $sub = document.getElementById("buildingSubtotal");
+  if(buildings.length >= 2){
+    $sub.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;padding:14px;background:linear-gradient(135deg,#EBF3FD,#F0F7FF);border-radius:12px;border:1px solid rgba(59,140,228,.2)">
+      <span style="font-size:14px;font-weight:600;color:var(--brand)">${buildings.length}건 합산 기본 관리비</span>
+      <span style="font-size:22px;font-weight:800;color:var(--brand)">₩${fmt(combinedTotal)}</span>
+    </div>`;
+  } else {
+    $sub.innerHTML = "";
+  }
+
+  calcQuote();
+}
+
+function getCombinedBasePrice(){
+  let total = 0;
+  buildings.forEach(b => { total += b._price || 0; });
+  return total;
+}
+
+/* ═══════════════════════════════════════
    MULTI-BUILDING DISCOUNT (수정 가능)
    ═══════════════════════════════════════ */
 const DISCOUNT_TIERS = [
@@ -753,7 +833,7 @@ const DISCOUNT_TIERS = [
 ];
 
 function checkDiscount(){
-  const count = parseInt(document.getElementById("qBldgCount").value) || 1;
+  const count = buildings.length;
   const $section = document.getElementById("discountSection");
   const $badge = document.getElementById("discountBadgeText");
   const $btns = document.getElementById("discountBtns");
@@ -767,22 +847,20 @@ function checkDiscount(){
   }
 
   $section.style.display = "block";
-  $badge.textContent = `${count}건 관리 — 다건물 할인이 적용됩니다!`;
+  $badge.textContent = `${count}건 관리 — 합산 금액 대비 할인 적용!`;
 
-  // Render discount buttons
-  const recommended = DISCOUNT_TIERS.find(t => count >= t.minBldg);
-  let recPct = recommended ? recommended.pct : 5;
-  // For 4+ buildings, scale up
+  let recPct = 5;
+  if(count >= 4) recPct = 15;
+  else if(count >= 3) recPct = 10;
   if(count >= 5) recPct = 20;
 
   $btns.innerHTML = DISCOUNT_TIERS.map(t => {
     let pct = t.pct;
     if(t.minBldg === 4 && count >= 5) pct = 20;
-    const isMatch = count >= t.minBldg && (DISCOUNT_TIERS.find(n => n.minBldg > t.minBldg && count >= n.minBldg) === undefined || t.minBldg === 4);
-    return `<button class="disc-btn${isMatch?' active':''}" onclick="selectDiscount(${pct})"><span class="pct">${pct}%</span><br>${t.label}</button>`;
+    const isRec = (count >= t.minBldg) && !DISCOUNT_TIERS.find(n => n.minBldg > t.minBldg && count >= n.minBldg);
+    return `<button class="disc-btn${isRec?' active':''}" onclick="selectDiscount(${pct})"><span class="pct">${pct}%</span><br>${t.label}</button>`;
   }).join("") + `<button class="disc-btn" onclick="selectDiscount(0)">직접 입력</button>`;
 
-  // Auto-select recommended discount
   const currentPct = parseInt(document.getElementById("qDiscountPct").value) || 0;
   if(currentPct === 0) selectDiscount(recPct);
 
@@ -797,11 +875,8 @@ function selectDiscount(pct){
 
 function applyDiscountPct(){
   const pct = parseFloat(document.getElementById("qDiscountPct").value) || 0;
-  const score = parseInt(document.getElementById("qScore").value) || 1;
-  const base = getBasePrice(score) || 0;
-
-  // Calculate discount on base price
-  const discountAmt = Math.round(base * pct / 100);
+  const combined = getCombinedBasePrice();
+  const discountAmt = Math.round(combined * pct / 100);
   document.getElementById("qDiscount").value = discountAmt;
   calcQuote();
 }
@@ -986,17 +1061,9 @@ function getTierLabel(score){
 }
 
 function calcQuote(){
-  const score=parseInt(document.getElementById("qScore").value)||1;
-  const base=getBasePrice(score);
+  const base=getCombinedBasePrice();
   const discount=parseInt(document.getElementById("qDiscount").value)||0;
   const vatMode=document.getElementById("qVat").value;
-
-  // Base price display
-  document.getElementById("qBasePrice").value=base!==null?`₩${fmt(base)}`:"해당 상품은 이 점수에 적용 불가";
-
-  // Score display
-  const $sd=document.getElementById("scoreDisplay");
-  $sd.innerHTML=`<div class="score-circle">${score}</div><div class="score-info"><div class="si-label">${PRICING[selectedProduct].label} · ${getTierLabel(score)}</div><div class="si-price">${base!==null?'₩'+fmt(base):'해당 없음'}</div></div>`;
 
   // Options total
   let optTotal=0;
@@ -1027,18 +1094,24 @@ function calcQuote(){
   emergencyText+=" (초과 시 1회당 ₩50,000)";
   document.getElementById("emergencyInfo").innerHTML="🚨 "+emergencyText;
 
-  // Total (monthly + branding one-time)
+  // Total
   const brandTotal=getBrandingTotal();
-  const brandLines=getBrandingLines();
-  const subtotal=(base||0)+optTotal;
+  const subtotal=base+optTotal;
   const afterDiscount=Math.max(0,subtotal-discount);
   const vat=vatMode==="include"?Math.round(afterDiscount*0.1):0;
   const grandTotal=afterDiscount+vat;
+  const discPct=document.getElementById("qDiscountPct")?parseFloat(document.getElementById("qDiscountPct").value)||0:0;
 
   const $tb=document.getElementById("totalBar");
-  let rows=`<div class="total-row"><span>기본 관리비 (${PRICING[selectedProduct].label})</span><span>${base!==null?'₩'+fmt(base):'–'}</span></div>`;
+  let rows="";
+  // Show each building
+  buildings.forEach((b,i)=>{
+    const p=b._price||0;
+    rows+=`<div class="total-row"><span>${b.name||'건물 '+(i+1)} (${b._score||0}점)</span><span>₩${fmt(p)}</span></div>`;
+  });
+  if(buildings.length>=2) rows+=`<div class="total-row" style="opacity:1;font-weight:600;border-top:1px solid rgba(255,255,255,.15);padding-top:6px;margin-top:4px"><span>기본 관리비 합산</span><span>₩${fmt(base)}</span></div>`;
   optLines.forEach(l=>{rows+=`<div class="total-row"><span>${l.name}</span><span>₩${fmt(l.price)}</span></div>`});
-  if(discount>0) rows+=`<div class="total-row"><span>할인</span><span>-₩${fmt(discount)}</span></div>`;
+  if(discount>0) rows+=`<div class="total-row"><span>다건물 할인 (${discPct}%)</span><span>-₩${fmt(discount)}</span></div>`;
   if(vat>0) rows+=`<div class="total-row"><span>부가세 (10%)</span><span>₩${fmt(vat)}</span></div>`;
   rows+=`<div class="total-row main"><span>월 합계 (VAT ${vatMode==="include"?"포함":"별도"})</span><span>₩${fmt(grandTotal)}</span></div>`;
   if(brandTotal>0){
@@ -1080,46 +1153,40 @@ ${bodyHTML}
 }
 
 function exportPDF(){
-  const bName=document.getElementById("qBldgName").value||"–";
   const oName=document.getElementById("qOwnerName").value||"–";
-  const area=document.getElementById("qArea").value||"–";
-  const tenants=document.getElementById("qTenants").value||"–";
-  const yr=document.getElementById("qYear").value||"–";
-  const age=yr!=="–"?(new Date().getFullYear()-parseInt(yr))+"년":"–";
-  const addr=document.getElementById("qAddr").value||"–";
-  const score=parseInt(document.getElementById("qScore").value)||1;
-  const base=getBasePrice(score);
+  const phone=document.getElementById("qOwnerPhone").value||"–";
+  const base=getCombinedBasePrice();
   const discount=parseInt(document.getElementById("qDiscount").value)||0;
+  const discPct=parseFloat(document.getElementById("qDiscountPct")?.value)||0;
   const vatMode=document.getElementById("qVat").value;
   const memo=document.getElementById("qMemo").value||"";
   const today=new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric"});
+  const mainName=buildings[0]?.name||"–";
 
-  let optLines=[];
-  let optTotal=0;
+  let optLines=[];let optTotal=0;
   OPTIONS.forEach(o=>{
     if(!selectedOptions[o.id])return;
     if(o.id==="hr"){
       const hrType=document.getElementById("qHrType").value;
       const salary=parseInt(document.getElementById("qSalary").value)||0;
       let hrPrice=hrType==="owner"?100000+Math.round(salary*0.03):200000+Math.round(salary*0.06);
-      optTotal+=hrPrice;
-      optLines.push({name:o.name+(hrType==="owner"?" (임대인)":"(둥지)"),price:hrPrice});
-    } else if(o.price>0){
-      optTotal+=o.price;
-      optLines.push({name:o.name,price:o.price});
-    }
+      optTotal+=hrPrice;optLines.push({name:o.name+(hrType==="owner"?" (임대인)":"(둥지)"),price:hrPrice});
+    } else if(o.price>0){ optTotal+=o.price;optLines.push({name:o.name,price:o.price}); }
   });
 
-  const subtotal=(base||0)+optTotal;
+  const subtotal=base+optTotal;
   const afterDiscount=Math.max(0,subtotal-discount);
   const vat=vatMode==="include"?Math.round(afterDiscount*0.1):0;
   const grandTotal=afterDiscount+vat;
-  const pdfBrandLines=getBrandingLines();
-  const pdfBrandTotal=getBrandingTotal();
+  const pdfBrandLines=getBrandingLines();const pdfBrandTotal=getBrandingTotal();
 
-  let itemRows=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">기본 관리비 (${PRICING[selectedProduct].label}, ${score}점)</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb">₩${fmt(base||0)}</td></tr>`;
+  // Building table
+  let bldgRows=buildings.map((b,i)=>`<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${b.name||'건물 '+(i+1)}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb">${b.addr||'–'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${b.area||'–'}평</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${b._score||0}점</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600">₩${fmt(b._price||0)}</td></tr>`).join("");
+
+  let itemRows="";
+  buildings.forEach((b,i)=>{itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">${b.name||'건물 '+(i+1)} 기본 관리비 (${b._score||0}점)</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb">₩${fmt(b._price||0)}</td></tr>`});
   optLines.forEach(l=>{itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">${l.name}</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb">₩${fmt(l.price)}</td></tr>`});
-  if(discount>0) itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">할인</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb;color:#dc2626">-₩${fmt(discount)}</td></tr>`;
+  if(discount>0) itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">다건물 할인 (${discPct}%)</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb;color:#dc2626">-₩${fmt(discount)}</td></tr>`;
   if(vat>0) itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">부가세 (10%)</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb">₩${fmt(vat)}</td></tr>`;
 
   let brandSection="";
@@ -1127,13 +1194,15 @@ function exportPDF(){
     brandSection=`<div style="font-size:15px;font-weight:700;margin:20px 0 10px">✨ 브랜딩 품목 (1회성)</div><table><tr><th>품목</th><th style="text-align:center;width:60px">수량</th><th style="text-align:right;width:120px">금액</th></tr>${pdfBrandLines.map(l=>`<tr><td>${l.name} <span style="color:#9ca3af;font-size:11px">${l.spec}</span></td><td style="text-align:center">${l.qty}</td><td style="text-align:right">₩${fmt(l.sub)}</td></tr>`).join("")}<tr style="background:#f3f0ff"><td colspan="2" style="font-weight:800">브랜딩 합계 (한도 ₩200,000)</td><td style="text-align:right;font-weight:800;color:#8B5CF6">₩${fmt(pdfBrandTotal)}${pdfBrandTotal>200000?' → 실비 ₩'+fmt(pdfBrandTotal-200000):''}</td></tr></table>`;
   }
 
-  printPDF('둥지_견적서_'+bName+'_'+today, `
+  printPDF('둥지_견적서_'+mainName+'_'+today, `
     <div style="display:flex;justify-content:space-between;border-bottom:3px solid #3B8CE4;padding-bottom:16px;margin-bottom:24px">
       <div><div style="font-size:22px;font-weight:800;color:#3B8CE4">둥지 Doongji</div><div style="font-size:12px;color:#6b7280">중/소형 빌딩 전문 위탁관리</div><div style="font-size:11px;color:#9ca3af;margin-top:4px">1577-9489</div></div>
       <div style="text-align:right"><div style="font-size:12px;color:#6b7280">견적일: ${today}</div></div>
     </div>
     <div style="font-size:22px;font-weight:800;margin-bottom:16px">건물관리 서비스 견적서</div>
-    <table><tr><th style="width:120px">빌딩명</th><td>${bName}</td><th style="width:90px">건물주</th><td>${oName}</td></tr><tr><th>주소</th><td colspan="3">${addr}</td></tr><tr><th>연면적</th><td>${area}평</td><th>임차사 수</th><td>${tenants}개</td></tr><tr><th>사용승인일</th><td>${yr}년 (${age})</td><th>건물 점수</th><td>${score}점</td></tr></table>
+    <table><tr><th style="width:100px">건물주</th><td>${oName}</td><th style="width:80px">연락처</th><td>${phone}</td></tr><tr><th>관리 건물</th><td colspan="3">${buildings.length}건</td></tr></table>
+    <div style="font-size:15px;font-weight:700;margin:20px 0 10px">관리 건물 목록</div>
+    <table><tr><th>빌딩명</th><th>주소</th><th style="text-align:center;width:70px">연면적</th><th style="text-align:center;width:50px">점수</th><th style="text-align:right;width:110px">관리비</th></tr>${bldgRows}</table>
     <div style="font-size:15px;font-weight:700;margin:20px 0 10px">서비스 내역</div>
     <table><tr><th>항목</th><th style="text-align:right;width:160px">월 금액</th></tr>${itemRows}<tr style="background:#f0f7ff"><td style="font-weight:800;font-size:15px;padding:12px 10px">월 합계 (VAT ${vatMode==="include"?"포함":"별도"})</td><td style="text-align:right;font-weight:800;font-size:18px;color:#3B8CE4;padding:12px 10px">₩${fmt(grandTotal)}</td></tr></table>
     ${brandSection}
@@ -1285,8 +1354,8 @@ function exportBrandingPDF(){
   });
   if(allSelected.length === 0){ alert("선택된 브랜딩 품목이 없습니다."); return; }
 
-  const bName = document.getElementById("qBldgName").value || "–";
-  const addr = document.getElementById("qAddr").value || "–";
+  const bName = buildings[0]?.name || "–";
+  const addr = buildings[0]?.addr || "–";
   const today = new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric"});
   const total = getBrandingTotal();
   const withinLimit = Math.min(total, BRAND_LIMIT);
@@ -1321,9 +1390,9 @@ function exportBrandingPDF(){
    ═══════════════════════════════════════ */
 renderTabs();
 renderContent();
+renderBuildings();
 renderOptions();
 renderBranding();
-autoScore();
 calcQuote();
 </script>
 </body>
