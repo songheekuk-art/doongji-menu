@@ -1069,7 +1069,7 @@ function toggleOption(id){
   document.getElementById("brandingSection").style.display=selectedOptions.branding?"block":"none";
   document.getElementById("adminSection").style.display=selectedOptions.admin?"block":"none";
   if(selectedOptions.admin) renderAdminItems();
-  if(!selectedOptions.admin){ adminChecked={}; adminDisc=false; document.getElementById("adminDiscOpt")?.classList.remove("checked"); }
+  if(!selectedOptions.admin){ initAdminChecked(); adminDisc=false; }
   if(!selectedOptions.branding){
     brandChecked={};
     document.querySelectorAll(".brand-item").forEach(el=>{el.classList.remove("checked");el.querySelector(".brand-qty").style.display="none"});
@@ -1455,14 +1455,26 @@ const ADMIN_ITEMS = [
 let adminChecked = {};
 let adminDisc = false;
 
+// 기본서비스만 체크 시 기본값 설정 (임대료+관리비+세금계산서 + 무료항목만)
+const ADMIN_CORE_IDS = ["a1","a2","a3","a9","a12","a13","a14","a15","a17","a18","a19"]; // 기본 + 무료
+
+function initAdminChecked(){
+  adminChecked = {};
+  ADMIN_ITEMS.forEach(item => {
+    if(!item.id) return;
+    adminChecked[item.id] = ADMIN_CORE_IDS.includes(item.id);
+  });
+}
+
 function renderAdminItems(){
-  const tc = parseInt(document.getElementById("aTenants").value)||10;
+  const tc = parseInt(document.getElementById("aTenants")?.value)||10;
+  // 첫 렌더링 시 기본값 세팅
+  if(Object.keys(adminChecked).length === 0) initAdminChecked();
   const $list = document.getElementById("adminItemList");
   let html = "";
   ADMIN_ITEMS.forEach(item => {
     if(item.cat){ html += `<div class="admin-cat">📌 ${item.cat}</div>`; return; }
-    const isOn = adminChecked[item.id] !== false;
-    adminChecked[item.id] = isOn;
+    const isOn = adminChecked[item.id] === true;
     const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
     const isEditable = item.qtyType==="manual";
     const sub = isOn ? qty * item.unitPrice : 0;
@@ -1488,6 +1500,7 @@ function updateAdminQty(id, val){
   const item = ADMIN_ITEMS.find(x => x.id === id);
   if(item) item._manualQty = parseInt(val)||0;
   calcAdmin();
+  calcQuote();
 }
 
 function toggleAdminDisc(){
@@ -1498,78 +1511,87 @@ function toggleAdminDisc(){
 }
 
 function calcAdmin(){
-  const tc = parseInt(document.getElementById("aTenants").value)||10;
+  const tc = parseInt(document.getElementById("aTenants")?.value)||10;
 
   // Auto-exclude 임차사: 임대료+관리비+세금계산서만 체크된 경우 임차사 비용 제외
-  const checkedNonCore = ADMIN_ITEMS.filter(x => x.id && !x.cat && !x.coreItem && !x.autoExclude && adminChecked[x.id]!==false && x.unitPrice>0);
+  const checkedNonCore = ADMIN_ITEMS.filter(x => x.id && !x.cat && !x.coreItem && !x.autoExclude && adminChecked[x.id]===true && x.unitPrice>0);
   const onlyCoreItems = checkedNonCore.length === 0;
-  const a1Auto = onlyCoreItems && adminChecked["a1"] !== false;
+  const a1Auto = onlyCoreItems && adminChecked["a1"] === true;
 
   let total = 0;
   ADMIN_ITEMS.forEach(item => {
     if(item.cat) return;
-    if(adminChecked[item.id] === false) return;
-    // 임차사 자동 제외 조건
-    if(item.autoExclude && a1Auto){ return; }
-    const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
+    if(adminChecked[item.id] !== true) return;
+    if(item.autoExclude && a1Auto) return;
+    let qty;
+    if(item.qtyType==="tenant") qty = tc;
+    else if(item.qtyType==="manual"){
+      const el = document.querySelector(`.admin-row[data-aid="${item.id}"] .a-qty`);
+      qty = el ? parseInt(el.value)||0 : (item._manualQty ?? item.fixedQty);
+      item._manualQty = qty;
+    } else qty = item.fixedQty;
     total += qty * item.unitPrice;
   });
 
-  const disc = adminDisc ? Math.round(total * 0.1) : 0;
-  const grand = total - disc;
-  document.getElementById("adminDiscAmt").textContent = disc > 0 ? `-₩${fmt(disc)}` : '₩0';
-  document.getElementById("adminSubAmt").textContent = `₩${fmt(grand)}`;
+  const grand = total;
 
-  // Show auto-exclude notice
+  // Update subtotal bar
   const $subBar = document.getElementById("adminSubtotalBar");
   if(a1Auto){
     $subBar.innerHTML = `<div><span style="font-size:14px;font-weight:600;color:var(--ad)">행정관리 소계</span><div style="font-size:11px;color:var(--ink-3)">ℹ️ 기본서비스만 → 임차사 비용 제외</div></div><span style="font-size:18px;font-weight:800;color:var(--ad)">₩${fmt(grand)}</span>`;
   } else {
-    $subBar.innerHTML = `<span style="font-size:14px;font-weight:600;color:var(--ad)">행정관리 소계${disc>0?' (할인 적용)':''}</span><span style="font-size:18px;font-weight:800;color:var(--ad)">₩${fmt(grand)}</span>`;
+    $subBar.innerHTML = `<span style="font-size:14px;font-weight:600;color:var(--ad)">행정관리 소계</span><span style="font-size:18px;font-weight:800;color:var(--ad)">₩${fmt(grand)}</span>`;
   }
 
-  // Update subtotal displays in rows
+  // Update each row's subtotal display
   document.querySelectorAll(".admin-row").forEach(row => {
     const aid = row.dataset.aid;
     const item = ADMIN_ITEMS.find(x => x.id === aid);
     if(!item) return;
-    const isOn = adminChecked[aid] !== false;
+    const isOn = adminChecked[aid] === true;
     const isExcluded = item.autoExclude && a1Auto;
-    const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
+    let qty;
+    if(item.qtyType==="tenant") qty = tc;
+    else if(item.qtyType==="manual") qty = parseInt(row.querySelector(".a-qty")?.value)||0;
+    else qty = item.fixedQty;
     const sub = (isOn && !isExcluded) ? qty * item.unitPrice : 0;
     const $sub = row.querySelector(".a-sub");
     if($sub){
       if(isExcluded){
         $sub.textContent = '자동제외';
         $sub.style.color = '#94A3B8';
-        $sub.style.fontSize = '11px';
       } else {
         $sub.textContent = sub > 0 ? '₩'+fmt(sub) : '–';
         $sub.style.color = '';
-        $sub.style.fontSize = '';
       }
     }
-    const $qty = row.querySelector(".a-qty");
-    if($qty && item.qtyType==="tenant") $qty.value = tc;
+    if(item.qtyType==="tenant"){
+      const $qty = row.querySelector(".a-qty");
+      if($qty) $qty.value = tc;
+    }
   });
 }
 
 function getAdminTotal(){
   if(!selectedOptions.admin) return 0;
   const tc = parseInt(document.getElementById("aTenants")?.value)||10;
-  const checkedNonCore = ADMIN_ITEMS.filter(x => x.id && !x.cat && !x.coreItem && !x.autoExclude && adminChecked[x.id]!==false && x.unitPrice>0);
+  const checkedNonCore = ADMIN_ITEMS.filter(x => x.id && !x.cat && !x.coreItem && !x.autoExclude && adminChecked[x.id]===true && x.unitPrice>0);
   const onlyCoreItems = checkedNonCore.length === 0;
-  const a1Auto = onlyCoreItems && adminChecked["a1"] !== false;
+  const a1Auto = onlyCoreItems && adminChecked["a1"] === true;
   let total = 0;
   ADMIN_ITEMS.forEach(item => {
     if(item.cat) return;
-    if(adminChecked[item.id] === false) return;
+    if(adminChecked[item.id] !== true) return;
     if(item.autoExclude && a1Auto) return;
-    const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
+    let qty;
+    if(item.qtyType==="tenant") qty = tc;
+    else if(item.qtyType==="manual"){
+      const el = document.querySelector(`.admin-row[data-aid="${item.id}"] .a-qty`);
+      qty = el ? parseInt(el.value)||0 : (item._manualQty ?? item.fixedQty);
+    } else qty = item.fixedQty;
     total += qty * item.unitPrice;
   });
-  const disc = adminDisc ? Math.round(total * 0.1) : 0;
-  return total - disc;
+  return total;
 }
 
 function switchQuoteMode(){} // legacy — no longer used
