@@ -201,6 +201,20 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 .disc-btn.active{border-color:var(--lm);background:#ECFDF5;color:#059669}
 .disc-btn .pct{font-size:16px;font-weight:800}
 
+/* ── Admin Quote Items ── */
+.admin-row{display:grid;grid-template-columns:32px 1fr 70px 80px 90px;gap:6px;align-items:center;padding:10px 12px;border-radius:8px;border-bottom:1px solid #f1f5f9;font-size:13px}
+.admin-row:hover{background:var(--surface-2)}
+.admin-row.off{opacity:.4}
+.admin-row .a-toggle{width:28px;height:28px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:12px;font-weight:700;color:transparent;transition:all .15s}
+.admin-row.on .a-toggle{border-color:var(--ad);background:var(--ad);color:#fff}
+.admin-row .a-name{font-weight:500;color:var(--ink)}
+.admin-row .a-name small{font-size:11px;color:var(--ink-3);display:block}
+.admin-row .a-qty{padding:6px 8px;border-radius:6px;border:1px solid var(--line);font-size:13px;text-align:center;width:100%}
+.admin-row .a-qty.editable{background:#FFFBEB;border-color:#F59E0B}
+.admin-row .a-price{text-align:right;font-size:12px;color:var(--ink-2)}
+.admin-row .a-sub{text-align:right;font-weight:700;color:var(--ad)}
+.admin-cat{font-size:12px;font-weight:700;color:var(--ad);padding:8px 12px;background:var(--ad-bg);border-radius:8px;margin:8px 0 4px}
+
 /* Compare Modal - removed */
 
 /* ── PDF Quote Template (hidden, used for export) ── */
@@ -310,6 +324,23 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 <div class="page" id="pageQuote">
   <div class="quote-wrap">
 
+    <!-- 0. Product Type Switch -->
+    <div class="q-section" style="padding:14px 20px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button class="p-card selected" id="modeBtn_fm" onclick="switchQuoteMode('fm')" style="padding:14px;cursor:pointer;border:2px solid var(--brand);border-radius:12px;background:var(--fm-bg);text-align:center">
+          <div style="font-size:15px;font-weight:700;color:var(--brand)">🔧 시설관리</div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:2px">점수제 기본 서비스</div>
+        </button>
+        <button class="p-card" id="modeBtn_admin" onclick="switchQuoteMode('admin')" style="padding:14px;cursor:pointer;border:2px solid var(--line);border-radius:12px;background:var(--surface);text-align:center">
+          <div style="font-size:15px;font-weight:700;color:var(--ink)">📋 행정관리</div>
+          <div style="font-size:11px;color:var(--ink-3);margin-top:2px">임차사 기반 정산</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══ FM MODE (시설관리) ═══ -->
+    <div id="quoteModeFM">
+
     <!-- 1. Owner Info -->
     <div class="q-section">
       <div class="q-section-title"><span class="ico">👤</span> 고객 정보</div>
@@ -404,6 +435,45 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 
     <!-- PDF Button -->
     <button class="btn-pdf" onclick="exportPDF()">📄 견적서 PDF 다운로드</button>
+
+    </div><!-- END quoteModeFM -->
+
+    <!-- ═══ ADMIN MODE (행정관리) ═══ -->
+    <div id="quoteModeAdmin" style="display:none">
+
+    <div class="q-section">
+      <div class="q-section-title"><span class="ico">👤</span> 고객 정보</div>
+      <div class="q-row">
+        <div class="q-field"><label>건물주명</label><input type="text" id="aOwnerName" placeholder="예: 홍길동"/></div>
+        <div class="q-field"><label>빌딩명</label><input type="text" id="aBldgName" placeholder="예: SS빌딩"/></div>
+      </div>
+      <div class="q-row">
+        <div class="q-field"><label>임차사 수</label><input type="number" id="aTenants" value="10" min="1" max="100" oninput="calcAdmin()" onchange="calcAdmin()"/></div>
+        <div class="q-field"><label>주소</label><input type="text" id="aAddr" placeholder="예: 서울시 강서구..."/></div>
+      </div>
+    </div>
+
+    <div class="q-section">
+      <div class="q-section-title"><span class="ico">📋</span> 행정관리 항목 (해당여부 O/X, 노란색 수정 가능)</div>
+      <div id="adminItemList"></div>
+    </div>
+
+    <div class="q-section">
+      <div class="q-section-title"><span class="ico">💰</span> 할인</div>
+      <div class="opt-item" id="adminDiscOpt" onclick="toggleAdminDisc()">
+        <div class="opt-left">
+          <div class="opt-check">✓</div>
+          <div><div class="opt-name">둥지 정산 할인 (10%)</div><div class="opt-desc">둥지 정산 반영 가능 시 10% 할인 적용</div></div>
+        </div>
+        <div class="opt-price" id="adminDiscAmt">₩0</div>
+      </div>
+    </div>
+
+    <div class="total-bar" id="adminTotalBar"></div>
+    <button class="btn-pdf" onclick="exportAdminPDF()">📄 행정관리 견적서 PDF 다운로드</button>
+
+    </div><!-- END quoteModeAdmin -->
+
   </div>
 </div>
 
@@ -1382,6 +1452,176 @@ function exportBrandingPDF(){
       <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #e5e7eb"><span style="font-weight:700;${overAmount>0?'color:#dc2626':'color:#059669'}">${overAmount>0?'실비정산 금액':'추가 비용'}</span><span style="font-size:18px;font-weight:800;${overAmount>0?'color:#dc2626':'color:#059669'}">₩${fmt(overAmount)}</span></div>
     </div>
     <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;text-align:center">㈜컨텍터스 · 둥지 | 1577-9489 | 내부 공유 문서</div>
+  `);
+}
+
+/* ═══════════════════════════════════════
+   ADMIN QUOTE (행정관리 상품)
+   qtyType: "tenant"=임차사수 연동, "fixed"=고정값, "manual"=수동입력
+   ═══════════════════════════════════════ */
+const ADMIN_ITEMS = [
+  { cat:"기본" },
+  { id:"a1", name:"임차사", qtyType:"tenant", unitPrice:5000, note:"" },
+  { id:"a2", name:"임대료", qtyType:"fixed", fixedQty:1, unitPrice:50000, note:"기본서비스+세금계산서만 시 임차사수 제외 가능" },
+  { id:"a3", name:"관리비", qtyType:"fixed", fixedQty:1, unitPrice:50000, note:"" },
+  { cat:"공과금" },
+  { id:"a4", name:"전기 (공용)", qtyType:"tenant", unitPrice:5000, note:"임차사 수 적용" },
+  { id:"a5", name:"수도 (공용)", qtyType:"tenant", unitPrice:5000, note:"임차사 수 적용" },
+  { id:"a6", name:"전기 (전용)", qtyType:"tenant", unitPrice:5000, note:"임차사 수 적용" },
+  { id:"a7", name:"수도 (전용)", qtyType:"tenant", unitPrice:5000, note:"임차사 수 적용" },
+  { cat:"기타" },
+  { id:"a8", name:"검침", qtyType:"manual", fixedQty:0, unitPrice:50000, note:"월1회 무료 / 추가시 수량 입력" },
+  { id:"a9", name:"세금계산서", qtyType:"fixed", fixedQty:1, unitPrice:100000, note:"공인인증서 필수" },
+  { id:"a10", name:"미납관리", qtyType:"tenant", unitPrice:5000, note:"계좌조회 필수" },
+  { id:"a11", name:"실비·수선충당금 등", qtyType:"manual", fixedQty:4, unitPrice:30000, note:"비목 수 입력 (노란색)" },
+  { cat:"청구서발송" },
+  { id:"a15", name:"기본 청구서", qtyType:"fixed", fixedQty:1, unitPrice:0, note:"무료" },
+  { id:"a16", name:"미납 청구서", qtyType:"manual", fixedQty:0, unitPrice:5000, note:"건당 비용 발생 (노란색)" },
+  { cat:"임대차관리" },
+  { id:"a12", name:"임대차 월별 현황보고", qtyType:"fixed", fixedQty:1, unitPrice:0, note:"무료" },
+  { id:"a13", name:"입/퇴실 정산", qtyType:"fixed", fixedQty:1, unitPrice:0, note:"무료" },
+  { cat:"고객센터" },
+  { id:"a14", name:"CS", qtyType:"tenant", unitPrice:0, note:"임차사 수 적용 · 무료" },
+  { cat:"플랫폼" },
+  { id:"a17", name:"플랫폼 사용", qtyType:"fixed", fixedQty:1, unitPrice:0, note:"계정 2개까지 무료" },
+  { id:"a18", name:"추가 계정", qtyType:"tenant", unitPrice:0, note:"무료" },
+  { id:"a19", name:"월 보고서", qtyType:"fixed", fixedQty:1, unitPrice:0, note:"월 1회 제공 · 무료" },
+];
+
+let adminChecked = {};
+let adminDisc = false;
+
+function renderAdminItems(){
+  const tc = parseInt(document.getElementById("aTenants").value)||10;
+  const $list = document.getElementById("adminItemList");
+  let html = "";
+  ADMIN_ITEMS.forEach(item => {
+    if(item.cat){ html += `<div class="admin-cat">📌 ${item.cat}</div>`; return; }
+    const isOn = adminChecked[item.id] !== false;
+    adminChecked[item.id] = isOn;
+    const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
+    const isEditable = item.qtyType==="manual";
+    const sub = isOn ? qty * item.unitPrice : 0;
+    const priceLabel = item.unitPrice === 0 ? "무료" : `₩${fmt(item.unitPrice)}`;
+    html += `<div class="admin-row ${isOn?'on':'off'}" data-aid="${item.id}">
+      <div class="a-toggle" onclick="toggleAdmin('${item.id}')">O</div>
+      <div class="a-name">${item.name}${item.note?`<small>${item.note}</small>`:''}</div>
+      <input type="number" class="a-qty${isEditable?' editable':''}" value="${qty}" min="0" ${isEditable?`oninput="updateAdminQty('${item.id}',this.value)"`:' readonly'} ${!isOn?'disabled':''}/>
+      <div class="a-price">${priceLabel}</div>
+      <div class="a-sub">${sub>0?'₩'+fmt(sub):'–'}</div>
+    </div>`;
+  });
+  $list.innerHTML = html;
+  calcAdmin();
+}
+
+function toggleAdmin(id){
+  adminChecked[id] = !adminChecked[id];
+  renderAdminItems();
+}
+
+function updateAdminQty(id, val){
+  const item = ADMIN_ITEMS.find(x => x.id === id);
+  if(item) item._manualQty = parseInt(val)||0;
+  calcAdmin();
+}
+
+function toggleAdminDisc(){
+  adminDisc = !adminDisc;
+  const $el = document.getElementById("adminDiscOpt");
+  $el.classList.toggle("checked", adminDisc);
+  calcAdmin();
+}
+
+function calcAdmin(){
+  const tc = parseInt(document.getElementById("aTenants").value)||10;
+  let total = 0;
+  ADMIN_ITEMS.forEach(item => {
+    if(item.cat) return;
+    if(adminChecked[item.id] === false) return;
+    const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
+    total += qty * item.unitPrice;
+  });
+
+  const disc = adminDisc ? Math.round(total * 0.1) : 0;
+  const grand = total - disc;
+  document.getElementById("adminDiscAmt").textContent = disc > 0 ? `-₩${fmt(disc)}` : '₩0';
+
+  const $tb = document.getElementById("adminTotalBar");
+  let rows = `<div class="total-row"><span>행정관리 합계</span><span>₩${fmt(total)}</span></div>`;
+  if(disc > 0) rows += `<div class="total-row"><span>둥지 정산 할인 (10%)</span><span>-₩${fmt(disc)}</span></div>`;
+  rows += `<div class="total-row main"><span>월 합계 (VAT 별도)</span><span>₩${fmt(grand)}</span></div>`;
+  $tb.innerHTML = rows;
+
+  // Update subtotal displays in rows
+  document.querySelectorAll(".admin-row").forEach(row => {
+    const aid = row.dataset.aid;
+    const item = ADMIN_ITEMS.find(x => x.id === aid);
+    if(!item) return;
+    const isOn = adminChecked[aid] !== false;
+    const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
+    const sub = isOn ? qty * item.unitPrice : 0;
+    const $sub = row.querySelector(".a-sub");
+    if($sub) $sub.textContent = sub > 0 ? '₩'+fmt(sub) : '–';
+    // Update tenant-linked qty display
+    const $qty = row.querySelector(".a-qty");
+    if($qty && item.qtyType==="tenant") $qty.value = tc;
+  });
+}
+
+function switchQuoteMode(mode){
+  document.getElementById("quoteModeFM").style.display = mode==="fm" ? "block" : "none";
+  document.getElementById("quoteModeAdmin").style.display = mode==="admin" ? "block" : "none";
+  const fmBtn = document.getElementById("modeBtn_fm");
+  const adBtn = document.getElementById("modeBtn_admin");
+  fmBtn.style.borderColor = mode==="fm" ? "var(--brand)" : "var(--line)";
+  fmBtn.style.background = mode==="fm" ? "var(--fm-bg)" : "var(--surface)";
+  adBtn.style.borderColor = mode==="admin" ? "var(--ad)" : "var(--line)";
+  adBtn.style.background = mode==="admin" ? "var(--ad-bg)" : "var(--surface)";
+  if(mode==="admin") renderAdminItems();
+}
+
+function exportAdminPDF(){
+  const oName = document.getElementById("aOwnerName").value||"–";
+  const bName = document.getElementById("aBldgName").value||"–";
+  const addr = document.getElementById("aAddr").value||"–";
+  const tc = parseInt(document.getElementById("aTenants").value)||10;
+  const today = new Date().toLocaleDateString("ko-KR",{year:"numeric",month:"long",day:"numeric"});
+
+  let total=0; let rows="";
+  ADMIN_ITEMS.forEach(item=>{
+    if(item.cat) return;
+    if(adminChecked[item.id]===false) return;
+    const qty=item.qtyType==="tenant"?tc:(item.qtyType==="fixed"?item.fixedQty:(item._manualQty??item.fixedQty));
+    const sub=qty*item.unitPrice; total+=sub;
+    const priceLabel=item.unitPrice===0?"무료":`₩${fmt(item.unitPrice)}`;
+    rows+=`<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.name}</td><td style="text-align:center;padding:8px;border-bottom:1px solid #e5e7eb">${qty}</td><td style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb">${priceLabel}</td><td style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;font-weight:600">${sub>0?'₩'+fmt(sub):'무료'}</td></tr>`;
+  });
+  const disc=adminDisc?Math.round(total*0.1):0;
+  const grand=total-disc;
+
+  printPDF('둥지_행정관리_견적서_'+bName+'_'+today, `
+    <div style="display:flex;justify-content:space-between;border-bottom:3px solid #E67E22;padding-bottom:16px;margin-bottom:24px">
+      <div><div style="font-size:22px;font-weight:800;color:#E67E22">둥지 Doongji</div><div style="font-size:12px;color:#6b7280">행정관리 상품 견적서</div><div style="font-size:11px;color:#9ca3af;margin-top:4px">1577-9489</div></div>
+      <div style="text-align:right"><div style="font-size:12px;color:#6b7280">견적일: ${today}</div></div>
+    </div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:16px">행정관리 서비스 견적서</div>
+    <table><tr><th style="width:100px">건물주</th><td>${oName}</td><th style="width:80px">빌딩명</th><td>${bName}</td></tr><tr><th>주소</th><td colspan="3">${addr}</td></tr><tr><th>임차사 수</th><td colspan="3">${tc}개</td></tr></table>
+    <div style="font-size:15px;font-weight:700;margin:20px 0 10px">서비스 항목</div>
+    <table><tr><th>항목</th><th style="text-align:center;width:60px">수량</th><th style="text-align:right;width:80px">단가</th><th style="text-align:right;width:100px">합계</th></tr>${rows}
+    ${disc>0?`<tr><td colspan="3" style="padding:8px;border-bottom:1px solid #e5e7eb">둥지 정산 할인 (10%)</td><td style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;color:#dc2626;font-weight:600">-₩${fmt(disc)}</td></tr>`:''}
+    <tr style="background:#FEF5E7"><td colspan="3" style="font-weight:800;font-size:15px;padding:12px 8px">월 합계 (VAT 별도)</td><td style="text-align:right;font-weight:800;font-size:18px;color:#E67E22;padding:12px 8px">₩${fmt(grand)}</td></tr></table>
+    <div style="margin-top:20px;padding:12px;background:#f8fafc;border-radius:8px;font-size:11px;color:#6b7280">
+      <strong>참고사항</strong><br>
+      1. 공실도 임차사 수에 모두 포함<br>
+      2. CS 미진행 시 본사로 임차사 연락 안내 필요<br>
+      3. 단가 수정은 본사에서만 가능<br>
+      4. 미납청구서는 별도 제작 비용 발생
+    </div>
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;text-align:center">
+      <p>본 견적서는 발행일로부터 30일간 유효합니다.</p>
+      <p>㈜컨텍터스 · 둥지 | 1577-9489</p>
+    </div>
   `);
 }
 
