@@ -370,7 +370,7 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
     <div class="q-section" id="adminSection" style="display:none">
       <div class="q-section-title"><span class="ico">📋</span> 행정관리 상세 항목</div>
       <div class="q-row" style="margin-bottom:12px">
-        <div class="q-field"><label>임차사 수 (행정관리 기준)</label><input type="number" id="aTenants" value="10" min="1" max="100" oninput="calcAdmin();calcQuote()" onchange="calcAdmin();calcQuote()"/></div>
+        <div class="q-field"><label>임차사 수 (행정관리 기준)</label><input type="number" id="aTenants" value="10" min="1" max="100" oninput="renderAdminItems();calcQuote()" onchange="renderAdminItems();calcQuote()"/></div>
         <div class="q-field" style="display:flex;align-items:flex-end">
           <div class="opt-item" id="adminDiscOpt" onclick="toggleAdminDisc()" style="margin:0;flex:1">
             <div class="opt-left"><div class="opt-check">✓</div><div><div class="opt-name" style="font-size:13px">둥지 정산 할인 (10%)</div></div></div>
