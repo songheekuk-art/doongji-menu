@@ -205,7 +205,7 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 .admin-row{display:grid;grid-template-columns:32px 1fr 70px 80px 90px;gap:6px;align-items:center;padding:10px 12px;border-radius:8px;border-bottom:1px solid #f1f5f9;font-size:13px}
 .admin-row:hover{background:var(--surface-2)}
 .admin-row.off{opacity:.4}
-.admin-row .a-toggle{width:28px;height:28px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:12px;font-weight:700;color:transparent;transition:all .15s}
+.admin-row .a-toggle{width:28px;height:28px;border-radius:8px;border:2px solid var(--line);display:grid;place-items:center;cursor:pointer;font-size:14px;font-weight:700;color:transparent;transition:all .15s;background:var(--surface)}
 .admin-row.on .a-toggle{border-color:var(--ad);background:var(--ad);color:#fff}
 .admin-row .a-name{font-weight:500;color:var(--ink)}
 .admin-row .a-name small{font-size:11px;color:var(--ink-3);display:block}
@@ -1461,9 +1461,10 @@ function exportBrandingPDF(){
    ═══════════════════════════════════════ */
 const ADMIN_ITEMS = [
   { cat:"기본" },
-  { id:"a1", name:"임차사", qtyType:"tenant", unitPrice:5000, note:"" },
-  { id:"a2", name:"임대료", qtyType:"fixed", fixedQty:1, unitPrice:50000, note:"기본서비스+세금계산서만 시 임차사수 제외 가능" },
-  { id:"a3", name:"관리비", qtyType:"fixed", fixedQty:1, unitPrice:50000, note:"" },
+  { id:"a1", name:"임차사", qtyType:"tenant", unitPrice:5000, note:"", autoExclude:true },
+  { id:"a2", name:"임대료", qtyType:"fixed", fixedQty:1, unitPrice:50000, note:"", coreItem:true },
+  { id:"a3", name:"관리비", qtyType:"fixed", fixedQty:1, unitPrice:50000, note:"", coreItem:true },
+  { id:"a9", name:"세금계산서", qtyType:"fixed", fixedQty:1, unitPrice:100000, note:"공인인증서 필수", coreItem:true },
   { cat:"공과금" },
   { id:"a4", name:"전기 (공용)", qtyType:"tenant", unitPrice:5000, note:"임차사 수 적용" },
   { id:"a5", name:"수도 (공용)", qtyType:"tenant", unitPrice:5000, note:"임차사 수 적용" },
@@ -1471,7 +1472,6 @@ const ADMIN_ITEMS = [
   { id:"a7", name:"수도 (전용)", qtyType:"tenant", unitPrice:5000, note:"임차사 수 적용" },
   { cat:"기타" },
   { id:"a8", name:"검침", qtyType:"manual", fixedQty:0, unitPrice:50000, note:"월1회 무료 / 추가시 수량 입력" },
-  { id:"a9", name:"세금계산서", qtyType:"fixed", fixedQty:1, unitPrice:100000, note:"공인인증서 필수" },
   { id:"a10", name:"미납관리", qtyType:"tenant", unitPrice:5000, note:"계좌조회 필수" },
   { id:"a11", name:"실비·수선충당금 등", qtyType:"manual", fixedQty:4, unitPrice:30000, note:"비목 수 입력 (노란색)" },
   { cat:"청구서발송" },
@@ -1504,7 +1504,7 @@ function renderAdminItems(){
     const sub = isOn ? qty * item.unitPrice : 0;
     const priceLabel = item.unitPrice === 0 ? "무료" : `₩${fmt(item.unitPrice)}`;
     html += `<div class="admin-row ${isOn?'on':'off'}" data-aid="${item.id}">
-      <div class="a-toggle" onclick="toggleAdmin('${item.id}')">O</div>
+      <div class="a-toggle" onclick="toggleAdmin('${item.id}')">✓</div>
       <div class="a-name">${item.name}${item.note?`<small>${item.note}</small>`:''}</div>
       <input type="number" class="a-qty${isEditable?' editable':''}" value="${qty}" min="0" ${isEditable?`oninput="updateAdminQty('${item.id}',this.value)"`:' readonly'} ${!isOn?'disabled':''}/>
       <div class="a-price">${priceLabel}</div>
@@ -1535,10 +1535,18 @@ function toggleAdminDisc(){
 
 function calcAdmin(){
   const tc = parseInt(document.getElementById("aTenants").value)||10;
+
+  // Auto-exclude 임차사: 임대료+관리비+세금계산서만 체크된 경우 임차사 비용 제외
+  const checkedNonCore = ADMIN_ITEMS.filter(x => x.id && !x.cat && !x.coreItem && !x.autoExclude && adminChecked[x.id]!==false && x.unitPrice>0);
+  const onlyCoreItems = checkedNonCore.length === 0;
+  const a1Auto = onlyCoreItems && adminChecked["a1"] !== false;
+
   let total = 0;
   ADMIN_ITEMS.forEach(item => {
     if(item.cat) return;
     if(adminChecked[item.id] === false) return;
+    // 임차사 자동 제외 조건
+    if(item.autoExclude && a1Auto){ return; }
     const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
     total += qty * item.unitPrice;
   });
@@ -1551,6 +1559,7 @@ function calcAdmin(){
   let rows = `<div class="total-row"><span>행정관리 합계</span><span>₩${fmt(total)}</span></div>`;
   if(disc > 0) rows += `<div class="total-row"><span>둥지 정산 할인 (10%)</span><span>-₩${fmt(disc)}</span></div>`;
   rows += `<div class="total-row main"><span>월 합계 (VAT 별도)</span><span>₩${fmt(grand)}</span></div>`;
+  if(a1Auto) rows += `<div class="total-row" style="opacity:.7;font-size:12px"><span>ℹ️ 기본서비스만 선택 → 임차사 수 비용 자동 제외</span><span></span></div>`;
   $tb.innerHTML = rows;
 
   // Update subtotal displays in rows
@@ -1559,11 +1568,21 @@ function calcAdmin(){
     const item = ADMIN_ITEMS.find(x => x.id === aid);
     if(!item) return;
     const isOn = adminChecked[aid] !== false;
+    const isExcluded = item.autoExclude && a1Auto;
     const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
-    const sub = isOn ? qty * item.unitPrice : 0;
+    const sub = (isOn && !isExcluded) ? qty * item.unitPrice : 0;
     const $sub = row.querySelector(".a-sub");
-    if($sub) $sub.textContent = sub > 0 ? '₩'+fmt(sub) : '–';
-    // Update tenant-linked qty display
+    if($sub){
+      if(isExcluded){
+        $sub.textContent = '자동제외';
+        $sub.style.color = '#94A3B8';
+        $sub.style.fontSize = '11px';
+      } else {
+        $sub.textContent = sub > 0 ? '₩'+fmt(sub) : '–';
+        $sub.style.color = '';
+        $sub.style.fontSize = '';
+      }
+    }
     const $qty = row.querySelector(".a-qty");
     if($qty && item.qtyType==="tenant") $qty.value = tc;
   });
