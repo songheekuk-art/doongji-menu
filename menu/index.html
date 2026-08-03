@@ -324,23 +324,6 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 <div class="page" id="pageQuote">
   <div class="quote-wrap">
 
-    <!-- 0. Product Type Switch -->
-    <div class="q-section" style="padding:14px 20px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button class="p-card selected" id="modeBtn_fm" onclick="switchQuoteMode('fm')" style="padding:14px;cursor:pointer;border:2px solid var(--brand);border-radius:12px;background:var(--fm-bg);text-align:center">
-          <div style="font-size:15px;font-weight:700;color:var(--brand)">🔧 시설관리</div>
-          <div style="font-size:11px;color:var(--ink-3);margin-top:2px">점수제 기본 서비스</div>
-        </button>
-        <button class="p-card" id="modeBtn_admin" onclick="switchQuoteMode('admin')" style="padding:14px;cursor:pointer;border:2px solid var(--line);border-radius:12px;background:var(--surface);text-align:center">
-          <div style="font-size:15px;font-weight:700;color:var(--ink)">📋 행정관리</div>
-          <div style="font-size:11px;color:var(--ink-3);margin-top:2px">임차사 기반 정산</div>
-        </button>
-      </div>
-    </div>
-
-    <!-- ═══ FM MODE (시설관리) ═══ -->
-    <div id="quoteModeFM">
-
     <!-- 1. Owner Info -->
     <div class="q-section">
       <div class="q-section-title"><span class="ico">👤</span> 고객 정보</div>
@@ -380,6 +363,25 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
           <label>월 급여 (원)</label>
           <input type="number" id="qSalary" placeholder="예: 2500000" value="0" onchange="calcQuote()" oninput="calcQuote()"/>
         </div>
+      </div>
+    </div>
+
+    <!-- 5-2. Admin Items (hidden until admin option checked) -->
+    <div class="q-section" id="adminSection" style="display:none">
+      <div class="q-section-title"><span class="ico">📋</span> 행정관리 상세 항목</div>
+      <div class="q-row" style="margin-bottom:12px">
+        <div class="q-field"><label>임차사 수 (행정관리 기준)</label><input type="number" id="aTenants" value="10" min="1" max="100" oninput="calcAdmin();calcQuote()" onchange="calcAdmin();calcQuote()"/></div>
+        <div class="q-field" style="display:flex;align-items:flex-end">
+          <div class="opt-item" id="adminDiscOpt" onclick="toggleAdminDisc()" style="margin:0;flex:1">
+            <div class="opt-left"><div class="opt-check">✓</div><div><div class="opt-name" style="font-size:13px">둥지 정산 할인 (10%)</div></div></div>
+            <div class="opt-price" id="adminDiscAmt" style="font-size:12px">₩0</div>
+          </div>
+        </div>
+      </div>
+      <div id="adminItemList"></div>
+      <div id="adminSubtotalBar" style="margin-top:10px;padding:12px 14px;background:var(--ad-bg);border-radius:10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:14px;font-weight:600;color:var(--ad)">행정관리 소계</span>
+        <span style="font-size:18px;font-weight:800;color:var(--ad)" id="adminSubAmt">₩0</span>
       </div>
     </div>
 
@@ -435,44 +437,6 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 
     <!-- PDF Button -->
     <button class="btn-pdf" onclick="exportPDF()">📄 견적서 PDF 다운로드</button>
-
-    </div><!-- END quoteModeFM -->
-
-    <!-- ═══ ADMIN MODE (행정관리) ═══ -->
-    <div id="quoteModeAdmin" style="display:none">
-
-    <div class="q-section">
-      <div class="q-section-title"><span class="ico">👤</span> 고객 정보</div>
-      <div class="q-row">
-        <div class="q-field"><label>건물주명</label><input type="text" id="aOwnerName" placeholder="예: 홍길동"/></div>
-        <div class="q-field"><label>빌딩명</label><input type="text" id="aBldgName" placeholder="예: SS빌딩"/></div>
-      </div>
-      <div class="q-row">
-        <div class="q-field"><label>임차사 수</label><input type="number" id="aTenants" value="10" min="1" max="100" oninput="calcAdmin()" onchange="calcAdmin()"/></div>
-        <div class="q-field"><label>주소</label><input type="text" id="aAddr" placeholder="예: 서울시 강서구..."/></div>
-      </div>
-    </div>
-
-    <div class="q-section">
-      <div class="q-section-title"><span class="ico">📋</span> 행정관리 항목 (해당여부 O/X, 노란색 수정 가능)</div>
-      <div id="adminItemList"></div>
-    </div>
-
-    <div class="q-section">
-      <div class="q-section-title"><span class="ico">💰</span> 할인</div>
-      <div class="opt-item" id="adminDiscOpt" onclick="toggleAdminDisc()">
-        <div class="opt-left">
-          <div class="opt-check">✓</div>
-          <div><div class="opt-name">둥지 정산 할인 (10%)</div><div class="opt-desc">둥지 정산 반영 가능 시 10% 할인 적용</div></div>
-        </div>
-        <div class="opt-price" id="adminDiscAmt">₩0</div>
-      </div>
-    </div>
-
-    <div class="total-bar" id="adminTotalBar"></div>
-    <button class="btn-pdf" onclick="exportAdminPDF()">📄 행정관리 견적서 PDF 다운로드</button>
-
-    </div><!-- END quoteModeAdmin -->
 
   </div>
 </div>
@@ -1108,6 +1072,9 @@ function toggleOption(id){
   document.querySelectorAll(".opt-item").forEach(el=>{el.classList.toggle("checked",!!selectedOptions[el.dataset.id])});
   document.getElementById("salarySection").style.display=selectedOptions.hr?"block":"none";
   document.getElementById("brandingSection").style.display=selectedOptions.branding?"block":"none";
+  document.getElementById("adminSection").style.display=selectedOptions.admin?"block":"none";
+  if(selectedOptions.admin) renderAdminItems();
+  if(!selectedOptions.admin){ adminChecked={}; adminDisc=false; document.getElementById("adminDiscOpt")?.classList.remove("checked"); }
   if(!selectedOptions.branding){
     brandChecked={};
     document.querySelectorAll(".brand-item").forEach(el=>{el.classList.remove("checked");el.querySelector(".brand-qty").style.display="none"});
@@ -1166,10 +1133,11 @@ function calcQuote(){
 
   // Total
   const brandTotal=getBrandingTotal();
+  const adminTotal=getAdminTotal();
   const subtotal=base+optTotal;
   const afterDiscount=Math.max(0,subtotal-discount);
-  const vat=vatMode==="include"?Math.round(afterDiscount*0.1):0;
-  const grandTotal=afterDiscount+vat;
+  const vat=vatMode==="include"?Math.round((afterDiscount+adminTotal)*0.1):0;
+  const grandTotal=afterDiscount+adminTotal+vat;
   const discPct=document.getElementById("qDiscountPct")?parseFloat(document.getElementById("qDiscountPct").value)||0:0;
 
   const $tb=document.getElementById("totalBar");
@@ -1182,6 +1150,7 @@ function calcQuote(){
   if(buildings.length>=2) rows+=`<div class="total-row" style="opacity:1;font-weight:600;border-top:1px solid rgba(255,255,255,.15);padding-top:6px;margin-top:4px"><span>기본 관리비 합산</span><span>₩${fmt(base)}</span></div>`;
   optLines.forEach(l=>{rows+=`<div class="total-row"><span>${l.name}</span><span>₩${fmt(l.price)}</span></div>`});
   if(discount>0) rows+=`<div class="total-row"><span>다건물 할인 (${discPct}%)</span><span>-₩${fmt(discount)}</span></div>`;
+  if(adminTotal>0) rows+=`<div class="total-row"><span>📋 행정관리 서비스</span><span>₩${fmt(adminTotal)}</span></div>`;
   if(vat>0) rows+=`<div class="total-row"><span>부가세 (10%)</span><span>₩${fmt(vat)}</span></div>`;
   rows+=`<div class="total-row main"><span>월 합계 (VAT ${vatMode==="include"?"포함":"별도"})</span><span>₩${fmt(grandTotal)}</span></div>`;
   if(brandTotal>0){
@@ -1554,13 +1523,15 @@ function calcAdmin(){
   const disc = adminDisc ? Math.round(total * 0.1) : 0;
   const grand = total - disc;
   document.getElementById("adminDiscAmt").textContent = disc > 0 ? `-₩${fmt(disc)}` : '₩0';
+  document.getElementById("adminSubAmt").textContent = `₩${fmt(grand)}`;
 
-  const $tb = document.getElementById("adminTotalBar");
-  let rows = `<div class="total-row"><span>행정관리 합계</span><span>₩${fmt(total)}</span></div>`;
-  if(disc > 0) rows += `<div class="total-row"><span>둥지 정산 할인 (10%)</span><span>-₩${fmt(disc)}</span></div>`;
-  rows += `<div class="total-row main"><span>월 합계 (VAT 별도)</span><span>₩${fmt(grand)}</span></div>`;
-  if(a1Auto) rows += `<div class="total-row" style="opacity:.7;font-size:12px"><span>ℹ️ 기본서비스만 선택 → 임차사 수 비용 자동 제외</span><span></span></div>`;
-  $tb.innerHTML = rows;
+  // Show auto-exclude notice
+  const $subBar = document.getElementById("adminSubtotalBar");
+  if(a1Auto){
+    $subBar.innerHTML = `<div><span style="font-size:14px;font-weight:600;color:var(--ad)">행정관리 소계</span><div style="font-size:11px;color:var(--ink-3)">ℹ️ 기본서비스만 → 임차사 비용 제외</div></div><span style="font-size:18px;font-weight:800;color:var(--ad)">₩${fmt(grand)}</span>`;
+  } else {
+    $subBar.innerHTML = `<span style="font-size:14px;font-weight:600;color:var(--ad)">행정관리 소계${disc>0?' (할인 적용)':''}</span><span style="font-size:18px;font-weight:800;color:var(--ad)">₩${fmt(grand)}</span>`;
+  }
 
   // Update subtotal displays in rows
   document.querySelectorAll(".admin-row").forEach(row => {
@@ -1588,17 +1559,25 @@ function calcAdmin(){
   });
 }
 
-function switchQuoteMode(mode){
-  document.getElementById("quoteModeFM").style.display = mode==="fm" ? "block" : "none";
-  document.getElementById("quoteModeAdmin").style.display = mode==="admin" ? "block" : "none";
-  const fmBtn = document.getElementById("modeBtn_fm");
-  const adBtn = document.getElementById("modeBtn_admin");
-  fmBtn.style.borderColor = mode==="fm" ? "var(--brand)" : "var(--line)";
-  fmBtn.style.background = mode==="fm" ? "var(--fm-bg)" : "var(--surface)";
-  adBtn.style.borderColor = mode==="admin" ? "var(--ad)" : "var(--line)";
-  adBtn.style.background = mode==="admin" ? "var(--ad-bg)" : "var(--surface)";
-  if(mode==="admin") renderAdminItems();
+function getAdminTotal(){
+  if(!selectedOptions.admin) return 0;
+  const tc = parseInt(document.getElementById("aTenants")?.value)||10;
+  const checkedNonCore = ADMIN_ITEMS.filter(x => x.id && !x.cat && !x.coreItem && !x.autoExclude && adminChecked[x.id]!==false && x.unitPrice>0);
+  const onlyCoreItems = checkedNonCore.length === 0;
+  const a1Auto = onlyCoreItems && adminChecked["a1"] !== false;
+  let total = 0;
+  ADMIN_ITEMS.forEach(item => {
+    if(item.cat) return;
+    if(adminChecked[item.id] === false) return;
+    if(item.autoExclude && a1Auto) return;
+    const qty = item.qtyType==="tenant" ? tc : (item.qtyType==="fixed" ? item.fixedQty : (item._manualQty ?? item.fixedQty));
+    total += qty * item.unitPrice;
+  });
+  const disc = adminDisc ? Math.round(total * 0.1) : 0;
+  return total - disc;
 }
+
+function switchQuoteMode(){} // legacy — no longer used
 
 function exportAdminPDF(){
   const oName = document.getElementById("aOwnerName").value||"–";
