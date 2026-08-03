@@ -1210,8 +1210,9 @@ function exportPDF(){
 
   const subtotal=base+optTotal;
   const afterDiscount=Math.max(0,subtotal-discount);
-  const vat=vatMode==="include"?Math.round(afterDiscount*0.1):0;
-  const grandTotal=afterDiscount+vat;
+  const adminTotal=getAdminTotal();
+  const vat=vatMode==="include"?Math.round((afterDiscount+adminTotal)*0.1):0;
+  const grandTotal=afterDiscount+adminTotal+vat;
   const pdfBrandLines=getBrandingLines();const pdfBrandTotal=getBrandingTotal();
 
   // Building table
@@ -1220,8 +1221,27 @@ function exportPDF(){
   let itemRows="";
   buildings.forEach((b,i)=>{itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">${b.name||'건물 '+(i+1)} 기본 관리비 (${b._score||0}점)</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb">₩${fmt(b._price||0)}</td></tr>`});
   optLines.forEach(l=>{itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">${l.name}</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb">₩${fmt(l.price)}</td></tr>`});
+  if(adminTotal>0) itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">📋 행정관리 서비스</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#E67E22">₩${fmt(adminTotal)}</td></tr>`;
   if(discount>0) itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">다건물 할인 (${discPct}%)</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb;color:#dc2626">-₩${fmt(discount)}</td></tr>`;
   if(vat>0) itemRows+=`<tr><td style="padding:10px;border-bottom:1px solid #e5e7eb">부가세 (10%)</td><td style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb">₩${fmt(vat)}</td></tr>`;
+
+  // Admin detail section for PDF
+  let adminSection="";
+  if(adminTotal>0){
+    const tc=parseInt(document.getElementById("aTenants")?.value)||10;
+    let adminRows="";
+    ADMIN_ITEMS.forEach(item=>{
+      if(item.cat) return;
+      if(adminChecked[item.id]!==true) return;
+      let qty;
+      if(item.qtyType==="tenant") qty=tc;
+      else if(item.qtyType==="manual"){ const el=document.querySelector(`.admin-row[data-aid="${item.id}"] .a-qty`); qty=el?parseInt(el.value)||0:(item._manualQty??item.fixedQty); }
+      else qty=item.fixedQty;
+      const sub=qty*item.unitPrice;
+      if(sub>0) adminRows+=`<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.name}</td><td style="text-align:center;padding:8px;border-bottom:1px solid #e5e7eb">${qty}</td><td style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb">₩${fmt(item.unitPrice)}</td><td style="text-align:right;padding:8px;border-bottom:1px solid #e5e7eb;font-weight:600">₩${fmt(sub)}</td></tr>`;
+    });
+    adminSection=`<div style="font-size:15px;font-weight:700;margin:20px 0 10px">📋 행정관리 상세 (임차사 ${tc}개)</div><table><tr><th>항목</th><th style="text-align:center;width:60px">수량</th><th style="text-align:right;width:80px">단가</th><th style="text-align:right;width:100px">합계</th></tr>${adminRows}<tr style="background:#FEF5E7"><td colspan="3" style="font-weight:800">행정관리 소계</td><td style="text-align:right;font-weight:800;color:#E67E22">₩${fmt(adminTotal)}</td></tr></table>`;
+  }
 
   let brandSection="";
   if(pdfBrandLines.length>0){
@@ -1239,6 +1259,7 @@ function exportPDF(){
     <table><tr><th>빌딩명</th><th>주소</th><th style="text-align:center;width:70px">연면적</th><th style="text-align:center;width:50px">점수</th><th style="text-align:right;width:110px">관리비</th></tr>${bldgRows}</table>
     <div style="font-size:15px;font-weight:700;margin:20px 0 10px">서비스 내역</div>
     <table><tr><th>항목</th><th style="text-align:right;width:160px">월 금액</th></tr>${itemRows}<tr style="background:#f0f7ff"><td style="font-weight:800;font-size:15px;padding:12px 10px">월 합계 (VAT ${vatMode==="include"?"포함":"별도"})</td><td style="text-align:right;font-weight:800;font-size:18px;color:#3B8CE4;padding:12px 10px">₩${fmt(grandTotal)}</td></tr></table>
+    ${adminSection}
     ${brandSection}
     ${memo?`<div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px"><strong>비고:</strong> ${memo}</div>`:""}
     <div style="margin-top:24px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:11px;color:#9ca3af;text-align:center">
