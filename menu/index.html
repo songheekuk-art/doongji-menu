@@ -348,32 +348,17 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
       <div id="emergencyInfo" style="margin-top:8px;padding:10px 14px;background:var(--surface-2);border-radius:10px;font-size:12px;color:var(--ink-2)"></div>
     </div>
 
-    <!-- 5. HR Salary (conditional) -->
+    <!-- 5. HR (conditional) -->
     <div class="q-section" id="salarySection" style="display:none">
       <div class="q-section-title"><span class="ico">👥</span> 인력 관리 상세</div>
-      <div style="margin-bottom:14px">
-        <label>고용 주체 선택</label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
-          <div class="p-card selected" id="hrCard_owner" onclick="selectHrType('owner')" style="padding:14px;cursor:pointer;border:2px solid var(--hr);border-radius:12px;background:var(--hr-bg);text-align:center">
-            <div style="font-size:15px;font-weight:700;color:var(--hr)">임대인 고용</div>
-            <div style="font-size:18px;font-weight:800;color:var(--hr);margin-top:4px">₩100,000</div>
-            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">+ 급여 × 3%</div>
-          </div>
-          <div class="p-card" id="hrCard_doongji" onclick="selectHrType('doongji')" style="padding:14px;cursor:pointer;border:2px solid var(--line);border-radius:12px;background:var(--surface);text-align:center">
-            <div style="font-size:15px;font-weight:700;color:var(--ink)">둥지 고용</div>
-            <div style="font-size:18px;font-weight:800;color:var(--hr);margin-top:4px">₩200,000</div>
-            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">+ 급여 × 6% + 간접노무비</div>
-          </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div id="hrCard_owner" onclick="selectHrType('owner')" style="padding:14px;cursor:pointer;border:2px solid var(--hr);border-radius:12px;background:var(--hr-bg);text-align:center">
+          <div style="font-size:15px;font-weight:700;color:var(--hr)">임대인 고용</div>
+          <div style="font-size:20px;font-weight:800;color:var(--hr);margin-top:4px">₩100,000</div>
         </div>
-      </div>
-      <div class="q-row">
-        <div class="q-field">
-          <label>월 급여 (원)</label>
-          <input type="number" id="qSalary" placeholder="예: 2,500,000" value="0" onchange="calcQuote()" oninput="calcQuote()"/>
-        </div>
-        <div class="q-field">
-          <label>인력관리 소계</label>
-          <input type="text" id="hrSubtotal" readonly style="background:#f0f3f8;font-weight:700;color:var(--hr)"/>
+        <div id="hrCard_doongji" onclick="selectHrType('doongji')" style="padding:14px;cursor:pointer;border:2px solid var(--line);border-radius:12px;background:var(--surface);text-align:center">
+          <div style="font-size:15px;font-weight:700;color:var(--ink)">둥지 고용</div>
+          <div style="font-size:20px;font-weight:800;color:var(--hr);margin-top:4px">₩200,000</div>
         </div>
       </div>
       <input type="hidden" id="qHrType" value="owner"/>
@@ -1129,14 +1114,9 @@ function calcQuote(){
     if(!selectedOptions[o.id])return;
     if(o.id==="hr"){
       const hrType=document.getElementById("qHrType").value;
-      const salary=parseInt(document.getElementById("qSalary").value)||0;
-      let hrPrice=0;
-      if(hrType==="owner"){ hrPrice=100000+Math.round(salary*0.03); }
-      else { hrPrice=200000+Math.round(salary*0.06); }
+      const hrPrice=hrType==="owner"?100000:200000;
       optTotal+=hrPrice;
       optLines.push({name:o.name+(hrType==="owner"?" (임대인 고용)":" (둥지 고용)"),price:hrPrice});
-      const $hrSub=document.getElementById("hrSubtotal");
-      if($hrSub) $hrSub.value=`₩${fmt(hrPrice)}`;
     } else if(o.id==="admin" || o.id==="branding"){
       // admin/branding 금액은 별도 계산 (getAdminTotal, getBrandingTotal)
     } else if(o.price>0){
@@ -1231,8 +1211,7 @@ function exportPDF(){
     if(!selectedOptions[o.id])return;
     if(o.id==="hr"){
       const hrType=document.getElementById("qHrType").value;
-      const salary=parseInt(document.getElementById("qSalary").value)||0;
-      let hrPrice=hrType==="owner"?100000+Math.round(salary*0.03):200000+Math.round(salary*0.06);
+      const hrPrice=hrType==="owner"?100000:200000;
       optTotal+=hrPrice;optLines.push({name:o.name+(hrType==="owner"?" (임대인)":"(둥지)"),price:hrPrice});
     } else if(o.price>0){ optTotal+=o.price;optLines.push({name:o.name,price:o.price}); }
   });
