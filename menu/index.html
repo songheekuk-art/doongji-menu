@@ -1523,6 +1523,7 @@ function renderAdminItems(){
 function toggleAdmin(id){
   adminChecked[id] = !adminChecked[id];
   renderAdminItems();
+  calcQuote();
 }
 
 function updateAdminQty(id, val){
