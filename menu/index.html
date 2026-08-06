@@ -351,19 +351,32 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
     <!-- 5. HR Salary (conditional) -->
     <div class="q-section" id="salarySection" style="display:none">
       <div class="q-section-title"><span class="ico">👥</span> 인력 관리 상세</div>
-      <div class="q-row">
-        <div class="q-field">
-          <label>고용 주체</label>
-          <select id="qHrType" onchange="calcQuote()">
-            <option value="owner">임대인 고용</option>
-            <option value="doongji">둥지 고용</option>
-          </select>
-        </div>
-        <div class="q-field">
-          <label>월 급여 (원)</label>
-          <input type="number" id="qSalary" placeholder="예: 2500000" value="0" onchange="calcQuote()" oninput="calcQuote()"/>
+      <div style="margin-bottom:14px">
+        <label>고용 주체 선택</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+          <div class="p-card selected" id="hrCard_owner" onclick="selectHrType('owner')" style="padding:14px;cursor:pointer;border:2px solid var(--hr);border-radius:12px;background:var(--hr-bg);text-align:center">
+            <div style="font-size:15px;font-weight:700;color:var(--hr)">임대인 고용</div>
+            <div style="font-size:18px;font-weight:800;color:var(--hr);margin-top:4px">₩100,000</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">+ 급여 × 3%</div>
+          </div>
+          <div class="p-card" id="hrCard_doongji" onclick="selectHrType('doongji')" style="padding:14px;cursor:pointer;border:2px solid var(--line);border-radius:12px;background:var(--surface);text-align:center">
+            <div style="font-size:15px;font-weight:700;color:var(--ink)">둥지 고용</div>
+            <div style="font-size:18px;font-weight:800;color:var(--hr);margin-top:4px">₩200,000</div>
+            <div style="font-size:11px;color:var(--ink-3);margin-top:2px">+ 급여 × 6% + 간접노무비</div>
+          </div>
         </div>
       </div>
+      <div class="q-row">
+        <div class="q-field">
+          <label>월 급여 (원)</label>
+          <input type="number" id="qSalary" placeholder="예: 2,500,000" value="0" onchange="calcQuote()" oninput="calcQuote()"/>
+        </div>
+        <div class="q-field">
+          <label>인력관리 소계</label>
+          <input type="text" id="hrSubtotal" readonly style="background:#f0f3f8;font-weight:700;color:var(--hr)"/>
+        </div>
+      </div>
+      <input type="hidden" id="qHrType" value="owner"/>
     </div>
 
     <!-- 5-2. Admin Items (hidden until admin option checked) -->
@@ -656,7 +669,7 @@ const PRICING = {
 const OPTIONS = [
   { id:"brokerage", name:"중개 관리 서비스", desc:"재계약서 작성, 공실 광고, 파트너 중개사 운영", price:200000 },
   { id:"admin", name:"행정 관리 서비스", desc:"임대료·관리비 청구, 미납 관리, 세금계산서 발행", price:0, label:"품목 선택" },
-  { id:"hr", name:"관리인력 채용 및 관리감독", desc:"구인구직, 면접, 채용, 근태 관리 및 교육", price:100000, hasSalary:true },
+  { id:"hr", name:"관리인력 채용 및 관리감독", desc:"구인구직, 면접, 채용, 근태 관리 및 교육", price:0, label:"품목 선택", hasSalary:true },
   { id:"exclusive", name:"전용부(내부) 관리", desc:"원룸·고시원·통임차 등 소모품 교체 및 관리", price:200000 },
   { id:"branding", name:"브랜딩 서비스", desc:"안내판·현판·게시판 등 건물 이미지 브랜딩 (20만원 한도 무상)", price:0, label:"품목 선택" },
   { id:"platform", name:"플랫폼 사용 (둥지OS)", desc:"임대인 대시보드, 임차인 포털", price:0, label:"현재 무료" },
@@ -1054,6 +1067,17 @@ function selectProduct(type){
   calcQuote();
 }
 
+function selectHrType(type){
+  document.getElementById("qHrType").value = type;
+  const ownerCard = document.getElementById("hrCard_owner");
+  const doongjiCard = document.getElementById("hrCard_doongji");
+  ownerCard.style.borderColor = type==="owner" ? "var(--hr)" : "var(--line)";
+  ownerCard.style.background = type==="owner" ? "var(--hr-bg)" : "var(--surface)";
+  doongjiCard.style.borderColor = type==="doongji" ? "var(--hr)" : "var(--line)";
+  doongjiCard.style.background = type==="doongji" ? "var(--hr-bg)" : "var(--surface)";
+  calcQuote();
+}
+
 function renderOptions(){
   const $list=document.getElementById("optionsList");
   $list.innerHTML=OPTIONS.map(o=>{
@@ -1100,7 +1124,6 @@ function calcQuote(){
   // Options total
   let optTotal=0;
   const optLines=[];
-  const checkedCount=Object.values(selectedOptions).filter(Boolean).length;
 
   OPTIONS.forEach(o=>{
     if(!selectedOptions[o.id])return;
@@ -1112,16 +1135,22 @@ function calcQuote(){
       else { hrPrice=200000+Math.round(salary*0.06); }
       optTotal+=hrPrice;
       optLines.push({name:o.name+(hrType==="owner"?" (임대인 고용)":" (둥지 고용)"),price:hrPrice});
-    } else {
+      const $hrSub=document.getElementById("hrSubtotal");
+      if($hrSub) $hrSub.value=`₩${fmt(hrPrice)}`;
+    } else if(o.id==="admin" || o.id==="branding"){
+      // admin/branding 금액은 별도 계산 (getAdminTotal, getBrandingTotal)
+    } else if(o.price>0){
       optTotal+=o.price;
-      if(o.price>0) optLines.push({name:o.name,price:o.price});
+      optLines.push({name:o.name,price:o.price});
     }
   });
 
-  // Emergency info
+  // Emergency info - 중개/행정/인력/전용부만 카운트 (브랜딩·플랫폼 제외)
+  const emergencyOpts = ["brokerage","admin","hr","exclusive"];
+  const checkedEmergency = emergencyOpts.filter(id => selectedOptions[id]).length;
   let emergencyText="";
-  if(checkedCount<=1) emergencyText="긴급출동 무료 제공: 0회";
-  else if(checkedCount===2) emergencyText="긴급출동 무료 제공: 월 2회";
+  if(checkedEmergency<=1) emergencyText="긴급출동 무료 제공: 0회";
+  else if(checkedEmergency===2) emergencyText="긴급출동 무료 제공: 월 2회";
   else emergencyText="긴급출동 무료 제공: 월 3회";
   emergencyText+=" (초과 시 1회당 ₩50,000)";
   document.getElementById("emergencyInfo").innerHTML="🚨 "+emergencyText;
