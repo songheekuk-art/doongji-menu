@@ -282,22 +282,6 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
 </head>
 <body>
 
-<!-- ═══ Login Screen ═══ -->
-<div class="login-overlay" id="loginOverlay">
-  <div style="text-align:center">
-    <div style="font-size:28px;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-1px">둥지 Doongji</div>
-    <div style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:24px">서비스 메뉴판 · 영업 플랫폼</div>
-    <div class="login-box">
-      <div class="login-title">로그인</div>
-      <div class="login-sub">아이디와 비밀번호를 입력하세요</div>
-      <div class="login-field"><label>아이디</label><input type="text" id="loginId" placeholder="아이디 입력" autocomplete="username"/></div>
-      <div class="login-field"><label>비밀번호</label><input type="password" id="loginPw" placeholder="비밀번호 입력" autocomplete="current-password"/></div>
-      <button class="login-btn" onclick="doLogin()">로그인</button>
-      <div class="login-error" id="loginError"></div>
-    </div>
-  </div>
-</div>
-
 <!-- ═══ Header ═══ -->
 <div class="header">
   <div class="header-inner">
@@ -306,7 +290,6 @@ label{font-size:13px;font-weight:600;color:var(--ink-2);display:block;margin-bot
       <div class="header-contact">
         <span class="contact-num">둥지 | 1577-9489</span>
         <span class="contact-tag">건물주가 온전히 본업과 여가생활에 집중할 수 있도록</span>
-        <button onclick="doLogout()" style="margin-top:4px;padding:4px 12px;border-radius:6px;background:rgba(255,255,255,.2);color:#fff;font-size:11px;border:none;cursor:pointer">로그아웃</button>
       </div>
     </div>
     <h1 id="pageTitle">서비스 메뉴판</h1>
