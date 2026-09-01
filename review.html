@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>한 달 리뷰 설문 | 둥지</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ink:#15181b; --ink2:#525a61; --ink3:#8a9198;
+  --paper:#f4f4f0; --card:#fff; --rule:#dcded6;
+  --blue:#2b5a87; --blue-soft:#eaf0f6;
+  --green:#1e6b57; --green-soft:#e7f1ed;
+  --alert:#a93a1c; --alert-soft:#fbeee9;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --sans:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.6;letter-spacing:-.01em;-webkit-font-smoothing:antialiased}
+.wrap{max-width:720px;margin:0 auto;padding:0 18px 120px}
+.wrap.nobar{padding-bottom:48px}
+.mono{font-family:var(--mono)}
+.hide{display:none !important}
+
+/* ── header ── */
+header.top{padding:36px 0 22px;border-bottom:2px solid var(--ink)}
+.eyebrow{font-family:var(--mono);font-size:10.5px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--ink3);display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--rule)}
+h1{font-size:clamp(26px,6.5vw,38px);line-height:1.1;margin:0;font-weight:800;letter-spacing:-.035em}
+.intro{margin:14px 0 0;color:var(--ink2);font-size:14.5px}
+.metaline{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.chip{font-family:var(--mono);font-size:11.5px;border:1px solid var(--rule);background:var(--card);
+  padding:5px 10px;border-radius:2px;color:var(--ink2)}
+.chip strong{color:var(--ink);font-weight:700}
+
+/* ── section ── */
+section.part{margin-top:34px}
+.sec-head{display:flex;align-items:baseline;gap:11px;margin-bottom:4px}
+.sec-no{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;
+  color:#fff;background:var(--blue);padding:4px 8px;border-radius:2px}
+.sec-head h2{font-size:17.5px;margin:0;font-weight:750;letter-spacing:-.03em}
+.sec-sub{margin:0 0 14px;color:var(--ink3);font-size:13px}
+
+/* ── question ── */
+.q{background:var(--card);border:1px solid var(--rule);border-radius:4px;
+  padding:16px 16px 15px;margin-bottom:11px}
+.q.err{border-color:var(--alert);box-shadow:0 0 0 2px var(--alert-soft)}
+.q .no{font-family:var(--mono);font-size:10.5px;font-weight:700;color:var(--blue);
+  letter-spacing:.06em;display:block;margin-bottom:4px}
+.q .qt{margin:0;font-size:15px;font-weight:650;letter-spacing:-.02em;line-height:1.45}
+.q .cond{display:block;font-weight:400;font-size:12px;color:var(--ink3);margin-bottom:3px}
+.req{color:var(--alert);font-weight:700;margin-left:3px}
+
+.scale{display:flex;gap:6px;margin-top:13px}
+.scale button{flex:1;min-width:0;border:1px solid var(--rule);background:#fff;border-radius:3px;
+  padding:10px 2px 8px;font-family:var(--sans);font-size:10.5px;color:var(--ink2);cursor:pointer;
+  line-height:1.25;transition:all .12s ease}
+.scale button b{display:block;font-family:var(--mono);font-size:15px;color:var(--ink);font-weight:700;margin-bottom:2px}
+.scale button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#dce7f1}
+.scale button[aria-pressed="true"] b{color:#fff}
+
+.nps{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;margin-top:13px}
+.nps button{border:1px solid var(--rule);background:#fff;border-radius:3px;padding:9px 0;
+  font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;transition:all .12s ease}
+.nps button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+.nps-lab{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--ink3)}
+
+.opts{display:grid;gap:7px;margin-top:13px}
+.opts button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  border:1px solid var(--rule);background:#fff;border-radius:3px;padding:11px 13px;
+  font-family:var(--sans);font-size:14px;color:var(--ink);cursor:pointer;transition:all .12s ease;line-height:1.4}
+.opts button .bx{flex:none;width:16px;height:16px;border:1.5px solid var(--ink3);border-radius:3px;
+  display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.opts.radio button .bx{border-radius:50%}
+.opts button[aria-pressed="true"]{border-color:var(--blue);background:var(--blue-soft)}
+.opts button[aria-pressed="true"] .bx{background:var(--blue);border-color:var(--blue)}
+
+textarea{width:100%;margin-top:11px;border:1px solid var(--rule);border-radius:3px;background:#fbfbf9;
+  padding:11px 12px;font-family:var(--sans);font-size:14px;color:var(--ink);line-height:1.55;
+  resize:vertical;min-height:84px}
+textarea:focus{outline:none;border-color:var(--blue);background:#fff}
+.follow{margin:14px 0 0;font-size:13.5px;color:var(--ink2)}
+
+.pledge{margin-top:12px;border-left:3px solid var(--green);background:var(--green-soft);
+  border-radius:0 2px 2px 0;padding:11px 13px}
+.pledge b.h{display:block;font-family:var(--mono);font-size:10px;font-weight:700;
+  letter-spacing:.1em;color:var(--green);margin-bottom:4px}
+.pledge p{margin:0;font-size:13px;color:#1d3b33;line-height:1.55}
+
+/* ── submit bar ── */
+.subbar{position:fixed;left:0;right:0;bottom:0;background:rgba(244,244,240,.94);
+  backdrop-filter:blur(8px);border-top:1px solid var(--rule);padding:12px 18px calc(12px + env(safe-area-inset-bottom));z-index:40}
+.subbar .inner{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px}
+.prog{flex:1;min-width:0}
+.prog .bar{height:5px;background:var(--rule);border-radius:3px;overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--green);width:0;transition:width .25s ease}
+.prog .t{font-family:var(--mono);font-size:10.5px;color:var(--ink3);margin-top:5px;display:block}
+.btn{border:0;border-radius:3px;padding:13px 22px;font-family:var(--sans);font-size:14.5px;
+  font-weight:700;letter-spacing:-.02em;cursor:pointer;white-space:nowrap}
+.btn.pri{background:var(--ink);color:#fff}
+.btn.pri:disabled{background:#c3c8cd;cursor:not-allowed}
+.btn.gh{background:#fff;border:1px solid var(--rule);color:var(--ink)}
+.btn.sm{padding:8px 13px;font-size:13px}
+.btn.dg{background:#fff;border:1px solid var(--alert);color:var(--alert)}
+
+/* ── modal ── */
+.mask{position:fixed;inset:0;background:rgba(21,24,27,.5);display:flex;align-items:center;
+  justify-content:center;padding:22px;z-index:60}
+.modal{background:#fff;border-radius:5px;max-width:400px;width:100%;padding:26px 24px 20px;
+  box-shadow:0 18px 50px rgba(0,0,0,.22);max-height:86vh;overflow:auto}
+.modal.wide{max-width:760px}
+.modal h3{margin:0 0 8px;font-size:19px;font-weight:780;letter-spacing:-.03em}
+.modal p{margin:0;color:var(--ink2);font-size:14px}
+.modal .acts{display:flex;gap:9px;margin-top:20px;justify-content:flex-end;flex-wrap:wrap}
+.tick{width:46px;height:46px;border-radius:50%;background:var(--green-soft);color:var(--green);
+  display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px}
+
+/* ── states ── */
+.state{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:30px 22px;
+  text-align:center;margin-top:34px}
+.state h2{margin:0 0 8px;font-size:20px;font-weight:750;letter-spacing:-.03em}
+.state p{margin:0;color:var(--ink2);font-size:14px}
+
+/* ── admin ── */
+.adm-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:26px 0 18px;border-bottom:2px solid var(--ink)}
+.adm-head h1{font-size:26px}
+.tabs{display:flex;gap:0;border:1.5px solid var(--ink);border-radius:2px;overflow:hidden;margin:20px 0 0}
+.tabs button{flex:1;border:0;background:#fff;padding:9px 6px;font-family:var(--sans);
+  font-size:13.5px;font-weight:650;color:var(--ink);cursor:pointer}
+.tabs button + button{border-left:1.5px solid var(--ink)}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:#fff}
+
+.panel{margin-top:20px}
+.field{margin-bottom:12px}
+.field label{display:block;font-family:var(--mono);font-size:10.5px;font-weight:700;
+  letter-spacing:.09em;color:var(--ink3);margin-bottom:5px}
+.field input,.field select{width:100%;border:1px solid var(--rule);border-radius:3px;background:#fff;
+  padding:10px 12px;font-family:var(--sans);font-size:14.5px;color:var(--ink)}
+.field input:focus,.field select:focus{outline:none;border-color:var(--blue)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:13px 14px}
+.stat .k{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.09em;color:var(--ink3)}
+.stat .v{font-family:var(--mono);font-size:24px;font-weight:700;letter-spacing:-.03em;margin-top:3px}
+.stat .v small{font-size:13px;color:var(--ink3);font-weight:500}
+
+.list{display:grid;gap:9px}
+.item{background:var(--card);border:1px solid var(--rule);border-radius:4px;padding:14px 15px}
+.item .l1{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.item .nm{font-size:15.5px;font-weight:750;letter-spacing:-.025em}
+.item .l2{font-family:var(--mono);font-size:11.5px;color:var(--ink3);margin-top:4px}
+.item .acts{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;
+  padding:3px 8px;border-radius:2px}
+.badge.pend{background:#f2f2ee;color:var(--ink3)}
+.badge.done{background:var(--green);color:#fff}
+
+.ansbox{border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-top:14px}
+.ansrow{display:grid;grid-template-columns:1fr auto;gap:12px;padding:10px 13px;border-bottom:1px solid var(--rule);font-size:13.5px}
+.ansrow:last-child{border-bottom:0}
+.ansrow .qq{color:var(--ink2);line-height:1.45}
+.ansrow .aa{font-family:var(--mono);font-weight:700;white-space:nowrap;color:var(--ink)}
+.ansrow.free{grid-template-columns:1fr}
+.ansrow.free .aa{white-space:normal;font-family:var(--sans);font-weight:500;margin-top:5px;
+  background:#fbfbf9;border-radius:3px;padding:9px 11px;line-height:1.55}
+.ansrow .grp{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:#fff;background:var(--ink);
+  margin:0;padding:6px 13px}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:11px 18px;border-radius:3px;font-size:13.5px;z-index:80;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+
+.note{font-size:12.5px;color:var(--ink3);margin-top:8px;line-height:1.5}
+.warnbox{background:var(--alert-soft);border-left:3px solid var(--alert);border-radius:0 2px 2px 0;
+  padding:12px 14px;margin-top:14px;font-size:13.5px;color:#6d3320;line-height:1.55}
+
+footer.ft{margin-top:38px;padding-top:15px;border-top:1px solid var(--rule);
+  font-family:var(--mono);font-size:10.5px;color:var(--ink3);display:flex;
+  justify-content:space-between;gap:10px;flex-wrap:wrap}
+
+@media (max-width:520px){
+  .wrap{padding:0 14px 120px}
+  .scale{gap:4px}
+  .scale button{font-size:9.5px;padding:9px 1px 7px}
+  .scale button b{font-size:14px}
+  .nps{gap:3px}
+  .nps button{padding:8px 0;font-size:11px}
+  .row2{grid-template-columns:1fr}
+  .btn{padding:12px 16px;font-size:14px}
+}
+
+/* ── print / PDF ── */
+@media print{
+  @page{size:A4 portrait;margin:13mm}
+  body{background:#fff;font-size:11px}
+  .wrap{max-width:none;padding:0}
+  .subbar,.tabs,.adm-head .btn,.item .acts,.noprint,.mask{display:none !important}
+  header.top{padding-top:0}
+  h1{font-size:26px}
+  .q,section.part,.ansbox,.item{break-inside:avoid;page-break-inside:avoid}
+  .scale button,.nps button,.opts button{border-color:#aab0b6}
+  textarea{min-height:60px;background:#fff}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ═══════════════════════════════════════════════
+   CONFIG — 여기 3줄만 채우면 동작합니다
+   ═══════════════════════════════════════════════ */
+const SUPABASE_URL  = 'https://YOUR_PROJECT.supabase.co';
+const SUPABASE_ANON = 'YOUR_ANON_KEY';
+const TABLE         = 'monthly_reviews';
+
+/* URL 정규화 — 뒤에 /rest/v1, /auth/v1, 슬래시가 붙어 있어도 자동 정리 */
+const SB = String(SUPABASE_URL).trim()
+  .replace(/\/+$/, '')
+  .replace(/\/(rest|auth|storage|realtime)\/v1$/, '')
+  .replace(/\/+$/, '');
+/* 관리자는 Supabase 계정(아이디/비밀번호)으로 로그인합니다.
+   service_role 키는 사용하지 않으며, 코드 어디에도 들어가지 않습니다. */
+
+/* ═══ Supabase REST 헬퍼 (fetch 기반) ═══ */
+function sbHeaders(key, extra){
+  let apikey = key, bearer = key;
+  if(key && typeof key === 'object'){ apikey = key.apikey; bearer = key.bearer; }
+  const h = {
+    'apikey': apikey,
+    'Authorization': 'Bearer ' + bearer,
+    'Content-Type': 'application/json'
+  };
+  return Object.assign(h, extra || {});
+}
+
+/* 로그인 */
+async function sbLogin(email, password){
+  const r = await fetch(SB + '/auth/v1/token?grant_type=password', {
+    method:'POST',
+    headers:{ 'apikey': SUPABASE_ANON, 'Content-Type':'application/json' },
+    body: JSON.stringify({ email: email, password: password })
+  });
+  const j = await r.json().catch(()=>({}));
+  if(!r.ok || !j.access_token){
+    const code = j.error_code || j.code || j.error || '';
+    const raw  = j.error_description || j.msg || j.message || '';
+    let msg;
+    if(String(code).indexOf('email_not_confirmed') > -1 || String(raw).indexOf('not confirmed') > -1){
+      msg = '계정이 아직 확인되지 않았습니다. Supabase > Authentication > Users 에서 해당 계정의 Confirm email 을 처리해 주십시오.';
+    } else if(String(raw).indexOf('Invalid login') > -1 || String(code).indexOf('invalid_credentials') > -1){
+      msg = '아이디 또는 비밀번호가 올바르지 않습니다.';
+    } else if(String(raw).indexOf('disabled') > -1 || String(code).indexOf('provider') > -1){
+      msg = '이메일 로그인이 비활성화되어 있습니다. Authentication > Sign In / Providers > Email 을 켜 주십시오.';
+    } else {
+      msg = (raw || '로그인 실패') + ' (' + r.status + (code ? ' / ' + code : '') + ')';
+    }
+    throw new Error(msg);
+  }
+  return j.access_token;
+}
+async function sbGet(path, key, extra){
+  const r = await fetch(SB + '/rest/v1/' + path, { headers: sbHeaders(key, extra) });
+  if(!r.ok) throw new Error('조회 실패 (' + r.status + ')');
+  return r.json();
+}
+async function sbPost(path, key, body, extra){
+  const r = await fetch(SB + '/rest/v1/' + path, {
+    method:'POST', headers: sbHeaders(key, Object.assign({'Prefer':'return=representation'}, extra||{})),
+    body: JSON.stringify(body)
+  });
+  if(!r.ok){
+    if(r.status === 404 && path.indexOf('rpc/') === 0){
+      throw new Error('설문 함수를 찾을 수 없습니다. schema2.sql 을 Supabase SQL Editor에서 실행해 주십시오. (404)');
+    }
+    throw new Error('요청 실패 (' + r.status + ')');
+  }
+  return r.json();
+}
+async function sbPatch(path, key, body, extra){
+  const r = await fetch(SB + '/rest/v1/' + path, {
+    method:'PATCH', headers: sbHeaders(key, Object.assign({'Prefer':'return=representation'}, extra||{})),
+    body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error('저장 실패 (' + r.status + ')');
+  return r.json();
+}
+async function sbDelete(path, key){
+  const r = await fetch(SB + '/rest/v1/' + path, { method:'DELETE', headers: sbHeaders(key) });
+  if(!r.ok) throw new Error('삭제 실패 (' + r.status + ')');
+  return true;
+}
+
+/* ═══ 설문 정의 ═══ */
+const S5  = ['전혀 아니다','아니다','보통','그렇다','매우 그렇다'];
+const S5M = ['매우 불만족','불만족','보통','만족','매우 만족'];
+
+const PARTS = [
+  { n:1, title:'서비스 시작 과정', sub:'계약부터 관리 개시까지의 준비 과정에 대한 문항입니다.' },
+  { n:2, title:'소통과 응대',      sub:'담당자와의 연락, 문의 처리, 입주사 소통 경로에 대한 문항입니다.' },
+  { n:3, title:'관리 플랫폼',      sub:'건물 현황 확인과 보고 수신에 사용하시는 플랫폼에 대한 문항입니다.' },
+  { n:4, title:'종합 평가',        sub:'지난 한 달 전반에 대한 문항입니다.' }
+];
+
+const Q = [
+  { id:'q1', part:1, type:'scale', labels:S5, req:true,
+    text:'계약 전에 안내받으신 내용과 실제 제공된 서비스가 일치했습니까?' },
+  { id:'q2', part:1, type:'scale', labels:S5, req:true,
+    text:'서비스 시작까지의 일정 안내가 충분했습니까?' },
+  { id:'q3', part:1, type:'scale', labels:S5, req:true,
+    text:'현장 사전방문에서 건물의 시설 현황이 정확히 파악되었다고 느끼셨습니까?' },
+
+  { id:'q4', part:2, type:'scale', labels:S5, req:true,
+    text:'담당자에게 연락하셨을 때 회신이 제때 이루어졌습니까?' },
+  { id:'q5', part:2, type:'scale', labels:S5, req:true,
+    text:'단체 대화방이 소통 창구로 편리했습니까?' },
+  { id:'q6', part:2, type:'scale', labels:S5, req:true,
+    text:'문의하신 사항에 대한 답변이 이해하기 쉽고 명확했습니까?' },
+  { id:'q7', part:2, type:'radio', req:true,
+    text:'지난 한 달간 입주사(임차인)로부터 임대인님께 직접 들어온 문의나 요청이 있으셨습니까?',
+    options:['없었다','한두 건 있었다','여러 건 있었다'],
+    freeId:'q7_text', freeLabel:'있으셨다면 어떤 내용이었는지 알려주십시오.',
+    freeWhen:(a)=> a.q7 && a.q7 !== '없었다',
+    pledge:'알려주신 내용은 저희가 해당 입주사에 <b>다시 안내드려, 앞으로는 둥지를 통해 소통이 이루어지도록</b> 적용하겠습니다. 임대인님께 직접 연락이 가는 일이 줄어들도록 관리하겠습니다.' },
+
+  { id:'q8', part:3, type:'radio', req:true,
+    text:'지난 한 달간 플랫폼을 얼마나 사용해 보셨습니까?',
+    options:['거의 사용하지 않았다','한두 번 열어보았다','가끔 확인했다','자주 확인했다'] },
+  { id:'q9', part:3, type:'scale', labels:S5, req:true,
+    text:'플랫폼으로 건물 현황을 확인하는 것이 편리했습니까?',
+    when:(a)=> a.q8==='가끔 확인했다' || a.q8==='자주 확인했다' },
+  { id:'q10', part:3, type:'multi', req:true,
+    text:'플랫폼을 사용하지 않으신 이유는 무엇입니까?', hint:'복수 선택 가능',
+    options:['굳이 확인할 필요를 느끼지 못했다','사용 방법을 잘 모르겠다','접속이 번거롭다','플랫폼이 있다는 안내를 받지 못했다','기타'],
+    when:(a)=> a.q8==='거의 사용하지 않았다' || a.q8==='한두 번 열어보았다',
+    freeId:'q10_text', freeLabel:'기타 의견이 있으시면 적어 주십시오.', freeWhen:()=>true },
+
+  { id:'q11', part:4, type:'scale', labels:S5M, req:true,
+    text:'지난 한 달간 저희 서비스에 대한 전반적인 만족도는 어떠셨습니까?' },
+  { id:'q12', part:4, type:'nps', req:true,
+    text:'다른 건물 소유주분께 저희 서비스를 추천하실 의향이 어느 정도입니까?' },
+  { id:'q13', part:4, type:'text', text:'가장 만족스러웠던 점은 무엇입니까?' },
+  { id:'q14', part:4, type:'text', text:'개선이 필요하다고 느끼신 점이 있다면 말씀해 주십시오.' }
+];
+
+function visibleQs(a){ return Q.filter(q => !q.when || q.when(a)); }
+function requiredQs(a){ return visibleQs(a).filter(q => q.req); }
+function isAnswered(q,a){
+  const v = a[q.id];
+  if(q.type==='multi') return Array.isArray(v) && v.length>0;
+  return v !== undefined && v !== null && v !== '';
+}
+
+/* ═══ 유틸 ═══ */
+const $ = (s,r)=> (r||document).querySelector(s);
+const app = $('#app');
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function makeToken(){
+  const b = new Uint8Array(12); crypto.getRandomValues(b);
+  return Array.from(b).map(x=>x.toString(36).padStart(2,'0')).join('').slice(0,18);
+}
+function fmtDate(d){
+  if(!d) return '—';
+  const x = new Date(d);
+  if(isNaN(x)) return d;
+  return x.getFullYear()+'.'+String(x.getMonth()+1).padStart(2,'0')+'.'+String(x.getDate()).padStart(2,'0');
+}
+function toast(msg){
+  const el = document.createElement('div');
+  el.className='toast'; el.textContent=msg; document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2200);
+}
+function modal(html){
+  const m = document.createElement('div');
+  m.className='mask'; m.innerHTML = '<div class="modal">'+html+'</div>';
+  m.addEventListener('click', e=>{ if(e.target===m) m.remove(); });
+  document.body.appendChild(m); return m;
+}
+function configured(){
+  return SUPABASE_URL.indexOf('YOUR_PROJECT')===-1 && SUPABASE_ANON.indexOf('YOUR_ANON')===-1;
+}
+
+/* ═══ 라우팅 ═══ */
+function route(){
+  const h = location.hash || '';
+  const m = h.match(/^#\/s\/([A-Za-z0-9_-]+)/);
+  if(m) return renderSurvey(m[1]);
+  return renderAdmin();
+}
+window.addEventListener('hashchange', route);
+
+
+/* ════════════════════════════════════════════
+   고객 화면 — 개별 토큰 링크
+   ════════════════════════════════════════════ */
+async function renderSurvey(token){
+  if(!configured()) return renderSetupNeeded();
+  app.innerHTML = '<div class="wrap"><div class="state"><h2>불러오는 중…</h2></div></div>';
+
+  let rec;
+  try{
+    const rows = await sbPost('rpc/get_monthly_review', SUPABASE_ANON, { p_token: token });
+    rec = rows && rows[0];
+  }catch(e){
+    return app.innerHTML = '<div class="wrap"><div class="state"><h2>불러오지 못했습니다</h2><p>'+esc(e.message)+'</p></div></div>';
+  }
+  if(!rec){
+    return app.innerHTML = '<div class="wrap"><div class="state"><h2>유효하지 않은 링크입니다</h2>'
+      + '<p>링크가 만료되었거나 잘못 전달되었을 수 있습니다. 담당자에게 문의해 주십시오.</p></div></div>';
+  }
+  if(rec.status === 'submitted') return renderDone(rec, true);
+
+  const answers = Object.assign({}, rec.answers || {});
+  drawForm();
+
+  function drawForm(){
+    let html = '<div class="wrap"><header class="top">'
+      + '<div class="eyebrow">둥지 · 건물관리 서비스</div>'
+      + '<h1>한 달 리뷰 설문</h1>'
+      + '<p class="intro">서비스를 시작한 지 한 달이 되었습니다. 지난 한 달을 어떻게 보셨는지 여쭙고자 합니다. '
+      + '주신 의견은 담당자와 운영 방식을 개선하는 데 직접 반영됩니다.</p>'
+      + '<div class="metaline">'
+      + '<span class="chip">건물명 <strong>'+esc(rec.building_name)+'</strong></span>'
+      + '<span class="chip">실시일 <strong>'+fmtDate(rec.survey_date)+'</strong></span>'
+      + '<span class="chip">약 3분</span>'
+      + '</div></header>';
+
+    PARTS.forEach(p=>{
+      const qs = visibleQs(answers).filter(q=>q.part===p.n);
+      if(!qs.length) return;
+      html += '<section class="part"><div class="sec-head"><span class="sec-no">PART '+p.n+'</span>'
+        + '<h2>'+esc(p.title)+'</h2></div><p class="sec-sub">'+esc(p.sub)+'</p>';
+      qs.forEach(q=> html += qHTML(q, answers));
+      html += '</section>';
+    });
+
+    html += '<footer class="ft"><span>한 달 리뷰 설문 · 둥지 건물관리</span><span>㈜컨텍터스</span></footer></div>'
+      + '<div class="subbar"><div class="inner">'
+      + '<div class="prog"><div class="bar"><i id="pbar"></i></div><span class="t" id="ptxt"></span></div>'
+      + '<button class="btn pri" id="doneBtn">완료하기</button>'
+      + '</div></div>';
+
+    app.innerHTML = html;
+    bind();
+    updateProgress();
+  }
+
+  function qHTML(q, a){
+    const num = 'Q' + (Q.indexOf(q)+1);
+    let h = '<div class="q" id="qc_'+q.id+'"><span class="no">'+num+'</span>'
+      + '<p class="qt">'+esc(q.text)+(q.req?'<span class="req">*</span>':'')
+      + (q.hint?' <span class="cond" style="display:inline">('+esc(q.hint)+')</span>':'')+'</p>';
+
+    if(q.type==='scale'){
+      h += '<div class="scale" data-q="'+q.id+'">';
+      q.labels.forEach((lb,i)=>{
+        const v=i+1;
+        h += '<button type="button" data-v="'+v+'" aria-pressed="'+(a[q.id]==v)+'"><b>'+v+'</b>'+esc(lb)+'</button>';
+      });
+      h += '</div>';
+    }
+    else if(q.type==='nps'){
+      h += '<div class="nps" data-q="'+q.id+'">';
+      for(let i=0;i<=10;i++) h += '<button type="button" data-v="'+i+'" aria-pressed="'+(a[q.id]==i)+'">'+i+'</button>';
+      h += '</div><div class="nps-lab"><span>전혀 없다</span><span>매우 높다</span></div>';
+    }
+    else if(q.type==='radio' || q.type==='multi'){
+      const sel = q.type==='multi' ? (a[q.id]||[]) : a[q.id];
+      h += '<div class="opts '+(q.type==='radio'?'radio':'')+'" data-q="'+q.id+'" data-mode="'+q.type+'">';
+      q.options.forEach(op=>{
+        const on = q.type==='multi' ? sel.indexOf(op)>-1 : sel===op;
+        h += '<button type="button" data-v="'+esc(op)+'" aria-pressed="'+on+'">'
+          + '<span class="bx">'+(on?'✓':'')+'</span>'+esc(op)+'</button>';
+      });
+      h += '</div>';
+    }
+    else if(q.type==='text'){
+      h += '<textarea data-free="'+q.id+'" rows="3" placeholder="자유롭게 적어 주십시오">'+esc(a[q.id]||'')+'</textarea>';
+    }
+
+    if(q.freeId && q.freeWhen && q.freeWhen(a)){
+      h += '<p class="follow">'+esc(q.freeLabel)+'</p>'
+        + '<textarea data-free="'+q.freeId+'" rows="3">'+esc(a[q.freeId]||'')+'</textarea>';
+    }
+    if(q.pledge){
+      h += '<div class="pledge"><b class="h">둥지 안내</b><p>'+q.pledge+'</p></div>';
+    }
+    return h + '</div>';
+  }
+
+  function bind(){
+    app.querySelectorAll('.scale,.nps').forEach(g=>{
+      g.addEventListener('click', e=>{
+        const b = e.target.closest('button'); if(!b) return;
+        answers[g.dataset.q] = Number(b.dataset.v);
+        drawForm();
+      });
+    });
+    app.querySelectorAll('.opts').forEach(g=>{
+      g.addEventListener('click', e=>{
+        const b = e.target.closest('button'); if(!b) return;
+        const id = g.dataset.q, v = b.dataset.v;
+        if(g.dataset.mode==='multi'){
+          const cur = answers[id] ? answers[id].slice() : [];
+          const i = cur.indexOf(v);
+          if(i>-1) cur.splice(i,1); else cur.push(v);
+          answers[id] = cur;
+        } else {
+          answers[id] = v;
+        }
+        drawForm();
+      });
+    });
+    app.querySelectorAll('textarea[data-free]').forEach(t=>{
+      t.addEventListener('input', ()=>{ answers[t.dataset.free] = t.value; updateProgress(); });
+    });
+    $('#doneBtn').addEventListener('click', trySubmit);
+  }
+
+  function updateProgress(){
+    const need = requiredQs(answers);
+    const got = need.filter(q=>isAnswered(q,answers)).length;
+    const pct = need.length ? Math.round(got/need.length*100) : 0;
+    const bar = $('#pbar'), txt = $('#ptxt');
+    if(bar) bar.style.width = pct+'%';
+    if(txt) txt.textContent = got + ' / ' + need.length + ' 문항 응답';
+    const btn = $('#doneBtn');
+    if(btn) btn.disabled = got < need.length;
+  }
+
+  function trySubmit(){
+    const need = requiredQs(answers);
+    const miss = need.filter(q=>!isAnswered(q,answers));
+    if(miss.length){
+      miss.forEach(q=>{ const el = $('#qc_'+q.id); if(el) el.classList.add('err'); });
+      const first = $('#qc_'+miss[0].id);
+      if(first) first.scrollIntoView({behavior:'smooth', block:'center'});
+      return toast('응답하지 않은 문항이 ' + miss.length + '개 있습니다');
+    }
+    const m = modal(
+      '<h3>제출하시겠습니까?</h3>'
+      + '<p>제출하신 뒤에는 응답을 수정하실 수 없습니다. 답변을 한 번 확인해 주십시오.</p>'
+      + '<div class="acts"><button class="btn gh" id="mNo">다시 보기</button>'
+      + '<button class="btn pri" id="mYes">제출하기</button></div>'
+    );
+    $('#mNo', m).onclick = ()=> m.remove();
+    $('#mYes', m).onclick = async ()=>{
+      const btn = $('#mYes', m); btn.disabled = true; btn.textContent = '제출 중…';
+      try{
+        const res = await sbPost('rpc/submit_monthly_review', SUPABASE_ANON,
+          { p_token: token, p_answers: answers });
+        const code = (typeof res === 'string') ? res : (res && res.result) || res;
+        if(code === 'already'){ m.remove(); return toast('이미 제출된 설문입니다'); }
+        if(code === 'not_found'){ m.remove(); return toast('링크를 확인해 주십시오'); }
+        m.remove();
+        rec.answers = answers; rec.status='submitted'; rec.submitted_at = new Date().toISOString();
+        showThanks(rec);
+      }catch(err){
+        btn.disabled=false; btn.textContent='제출하기';
+        toast(err.message);
+      }
+    };
+  }
+}
+
+function showThanks(rec){
+  const m = modal(
+    '<div class="tick">✓</div>'
+    + '<h3>제출이 완료되었습니다</h3>'
+    + '<p>소중한 의견 감사합니다. 주신 내용은 담당 RM이 검토한 뒤 개선에 반영하겠습니다.</p>'
+    + '<div class="acts"><button class="btn pri" id="okBtn">확인</button></div>'
+  );
+  $('#okBtn', m).onclick = ()=>{ m.remove(); renderDone(rec, false); };
+}
+
+function renderDone(rec, already){
+  const a = rec.answers || {};
+  let html = '<div class="wrap nobar"><header class="top">'
+    + '<div class="eyebrow">둥지 · 건물관리 서비스</div><h1>한 달 리뷰 설문</h1>'
+    + '<p class="intro">'+(already
+        ? '이미 응답을 제출하신 설문입니다. 아래에서 제출하신 내용을 확인하실 수 있습니다.'
+        : '응답이 정상적으로 접수되었습니다. 감사합니다.')+'</p>'
+    + '<div class="metaline">'
+    + '<span class="chip">건물명 <strong>'+esc(rec.building_name)+'</strong></span>'
+    + '<span class="chip">실시일 <strong>'+fmtDate(rec.survey_date)+'</strong></span>'
+    + '<span class="chip">제출 <strong>'+fmtDate(rec.submitted_at)+'</strong></span>'
+    + '</div></header>'
+    + answersHTML(a)
+    + '<footer class="ft"><span>한 달 리뷰 설문 · 둥지 건물관리</span><span>㈜컨텍터스</span></footer></div>';
+  app.innerHTML = html;
+}
+
+function answersHTML(a){
+  let h = '<div class="ansbox">';
+  PARTS.forEach(p=>{
+    const qs = visibleQs(a).filter(q=>q.part===p.n);
+    if(!qs.length) return;
+    h += '<p class="grp">PART '+p.n+' · '+esc(p.title)+'</p>';
+    qs.forEach(q=>{
+      const num = 'Q'+(Q.indexOf(q)+1);
+      let v = a[q.id];
+      if(q.type==='scale') v = (v?v+'점 · '+q.labels[v-1]:'—');
+      else if(q.type==='nps') v = (v===undefined||v===null?'—':v+'점');
+      else if(q.type==='multi') v = (v&&v.length? v.join(', ') : '—');
+      else v = v || '—';
+      const free = q.type==='text' || q.type==='multi';
+      h += '<div class="ansrow'+(free?' free':'')+'"><div class="qq">'+num+'. '+esc(q.text)+'</div>'
+        + '<div class="aa">'+esc(v)+'</div></div>';
+      if(q.freeId && a[q.freeId]){
+        h += '<div class="ansrow free"><div class="qq">'+esc(q.freeLabel)+'</div>'
+          + '<div class="aa">'+esc(a[q.freeId])+'</div></div>';
+      }
+    });
+  });
+  return h + '</div>';
+}
+
+function renderSetupNeeded(){
+  app.innerHTML = '<div class="wrap"><header class="top">'
+    + '<div class="eyebrow">SETUP</div><h1>설정이 필요합니다</h1></header>'
+    + '<div class="warnbox">HTML 상단 CONFIG 영역의 <b>SUPABASE_URL</b>과 <b>SUPABASE_ANON</b> 값을 '
+    + '실제 프로젝트 값으로 바꿔 주십시오. 그리고 함께 드린 schema.sql · schema2.sql · schema3.sql 을 Supabase SQL Editor에서 순서대로 실행해야 합니다.</div></div>';
+}
+
+
+/* ════════════════════════════════════════════
+   관리자 화면
+   ════════════════════════════════════════════ */
+const KEY_STORE = 'doongji_review_session';
+let ADMIN_KEY = null;
+let ADMIN_TAB = 'list';
+let ROWS = [];
+
+function renderAdmin(){
+  if(!configured()) return renderSetupNeeded();
+  if(!ADMIN_KEY){
+    const t = sessionStorage.getItem(KEY_STORE);
+    if(t) ADMIN_KEY = { apikey: SUPABASE_ANON, bearer: t };
+  }
+  if(!ADMIN_KEY) return renderKeyGate();
+  drawAdmin();
+  loadRows();
+}
+
+function renderKeyGate(){
+  app.innerHTML = '<div class="wrap"><header class="top">'
+    + '<div class="eyebrow">둥지 · 관리자</div><h1>한 달 리뷰 관리</h1>'
+    + '<p class="intro">관리자 계정으로 로그인해 주십시오.</p>'
+    + '</header><div class="panel">'
+    + '<div class="field"><label>아이디 (이메일)</label>'
+    + '<input type="email" id="emIn" placeholder="pm@doongji.co.kr" autocomplete="username"></div>'
+    + '<div class="field"><label>비밀번호</label>'
+    + '<input type="password" id="pwIn" placeholder="••••••••" autocomplete="current-password"></div>'
+    + '<button class="btn pri" id="keyGo">로그인</button>'
+    + '<p class="note" id="loginMsg"></p>'
+    + '</div></div>';
+
+  const go = async ()=>{
+    const em = $('#emIn').value.trim(), pw = $('#pwIn').value;
+    if(!em || !pw) return toast('아이디와 비밀번호를 입력해 주십시오');
+    const btn = $('#keyGo'); btn.disabled = true; btn.textContent = '확인 중…';
+    try{
+      const tok = await sbLogin(em, pw);
+      sessionStorage.setItem(KEY_STORE, tok);
+      ADMIN_KEY = { apikey: SUPABASE_ANON, bearer: tok };
+      renderAdmin();
+    }catch(e){
+      btn.disabled = false; btn.textContent = '로그인';
+      const m = $('#loginMsg');
+      if(m){ m.textContent = e.message; m.style.color = 'var(--alert)'; }
+    }
+  };
+  $('#keyGo').onclick = go;
+  ['emIn','pwIn'].forEach(id=>{
+    $('#'+id).addEventListener('keydown', e=>{ if(e.key==='Enter') go(); });
+  });
+}
+
+function drawAdmin(){
+  app.innerHTML = '<div class="wrap">'
+    + '<div class="adm-head"><div><div class="eyebrow">둥지 · 관리자</div><h1>한 달 리뷰 관리</h1></div>'
+    + '<button class="btn gh sm" id="outBtn">로그아웃</button></div>'
+    + '<div class="tabs">'
+    + '<button data-t="list" aria-pressed="'+(ADMIN_TAB==='list')+'">설문 목록</button>'
+    + '<button data-t="new"  aria-pressed="'+(ADMIN_TAB==='new')+'">새 설문 발행</button>'
+    + '<button data-t="stat" aria-pressed="'+(ADMIN_TAB==='stat')+'">응답 통계</button>'
+    + '</div><div class="panel" id="panel"><div class="state"><h2>불러오는 중…</h2></div></div>'
+    + '<footer class="ft"><span>한 달 리뷰 관리 · 둥지</span><span>㈜컨텍터스</span></footer></div>';
+
+  app.querySelectorAll('.tabs button').forEach(b=>{
+    b.onclick = ()=>{ ADMIN_TAB = b.dataset.t; drawAdmin(); drawPanel(); };
+  });
+  $('#outBtn').onclick = ()=>{
+    sessionStorage.removeItem(KEY_STORE); ADMIN_KEY=null; ROWS=[]; renderAdmin();
+  };
+}
+
+async function loadRows(){
+  try{
+    ROWS = await sbGet(TABLE + '?select=*&order=created_at.desc', ADMIN_KEY);
+  }catch(e){
+    if(String(e.message).indexOf('401') > -1 || String(e.message).indexOf('403') > -1){
+      sessionStorage.removeItem(KEY_STORE); ADMIN_KEY = null;
+      toast('로그인이 만료되었습니다. 다시 로그인해 주십시오');
+      return renderAdmin();
+    }
+    $('#panel').innerHTML = '<div class="warnbox">'+esc(e.message)+'</div>';
+    return;
+  }
+  drawPanel();
+}
+
+function drawPanel(){
+  const p = $('#panel'); if(!p) return;
+  if(ADMIN_TAB==='new')  return drawNew(p);
+  if(ADMIN_TAB==='stat') return drawStat(p);
+  return drawList(p);
+}
+
+function drawNew(p){
+  p.innerHTML = '<div class="row2">'
+    + '<div class="field"><label>건물명</label><input id="nBld" placeholder="예) 둥지빌딩"></div>'
+    + '<div class="field"><label>실시일</label><input id="nDate" type="date"></div>'
+    + '</div>'
+    + '<div class="field"><label>담당자 (선택)</label><input id="nMgr" placeholder="예) 김영관"></div>'
+    + '<button class="btn pri" id="mkBtn">링크 발행</button>'
+    + '<p class="note">발행하면 고객 전용 링크가 생성됩니다. 이 링크로는 해당 건물의 설문만 열리며, '
+    + '다른 고객의 응답은 조회되지 않습니다.</p>';
+  $('#nDate').value = new Date().toISOString().slice(0,10);
+  $('#mkBtn').onclick = async ()=>{
+    const bld = $('#nBld').value.trim();
+    if(!bld) return toast('건물명을 입력해 주십시오');
+    const btn = $('#mkBtn'); btn.disabled=true; btn.textContent='발행 중…';
+    try{
+      const row = { token: makeToken(), building_name: bld,
+        survey_date: $('#nDate').value || null, manager: $('#nMgr').value.trim() || null };
+      const res = await sbPost(TABLE, ADMIN_KEY, [row]);
+      const rec = res[0];
+      showLink(rec);
+      ADMIN_TAB='list'; drawAdmin(); await loadRows();
+    }catch(e){
+      btn.disabled=false; btn.textContent='링크 발행'; toast(e.message);
+    }
+  };
+}
+
+function linkOf(rec){
+  return location.origin + location.pathname + '#/s/' + rec.token;
+}
+
+function showLink(rec){
+  const url = linkOf(rec);
+  const m = modal('<h3>링크가 발행되었습니다</h3>'
+    + '<p>'+esc(rec.building_name)+' · '+fmtDate(rec.survey_date)+'</p>'
+    + '<div class="field" style="margin-top:14px"><label>고객 전용 링크</label>'
+    + '<input id="lk" readonly value="'+esc(url)+'"></div>'
+    + '<div class="acts"><button class="btn gh" id="cpBtn">복사</button>'
+    + '<button class="btn pri" id="clBtn">확인</button></div>');
+  $('#cpBtn', m).onclick = ()=> copy(url);
+  $('#clBtn', m).onclick = ()=> m.remove();
+  $('#lk', m).onclick = function(){ this.select(); };
+}
+
+function copy(t){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(t).then(()=>toast('복사되었습니다'), ()=>fallbackCopy(t));
+  } else fallbackCopy(t);
+}
+function fallbackCopy(t){
+  const i = document.createElement('textarea');
+  i.value = t; document.body.appendChild(i); i.select();
+  try{ document.execCommand('copy'); toast('복사되었습니다'); }catch(e){ toast('복사에 실패했습니다'); }
+  i.remove();
+}
+
+function drawList(p){
+  if(!ROWS.length){
+    p.innerHTML = '<div class="state"><h2>발행된 설문이 없습니다</h2><p>‘새 설문 발행’ 탭에서 첫 링크를 만들어 보십시오.</p></div>';
+    return;
+  }
+  const done = ROWS.filter(r=>r.status==='submitted').length;
+  let h = '<div class="stats">'
+    + '<div class="stat"><div class="k">발행</div><div class="v">'+ROWS.length+'</div></div>'
+    + '<div class="stat"><div class="k">응답</div><div class="v">'+done+'</div></div>'
+    + '<div class="stat"><div class="k">응답률</div><div class="v">'+(ROWS.length?Math.round(done/ROWS.length*100):0)+'<small>%</small></div></div>'
+    + '</div><div class="list">';
+  ROWS.forEach((r,i)=>{
+    h += '<div class="item"><div class="l1"><span class="nm">'+esc(r.building_name)+'</span>'
+      + '<span class="badge '+(r.status==='submitted'?'done':'pend')+'">'
+      + (r.status==='submitted'?'응답 완료':'미응답')+'</span></div>'
+      + '<div class="l2">실시일 '+fmtDate(r.survey_date)+(r.manager?' · 담당 '+esc(r.manager):'')
+      + (r.submitted_at?' · 제출 '+fmtDate(r.submitted_at):'')+'</div>'
+      + '<div class="acts">'
+      + '<button class="btn gh sm" data-a="copy" data-i="'+i+'">링크 복사</button>'
+      + (r.status==='submitted'?'<button class="btn gh sm" data-a="view" data-i="'+i+'">응답 보기</button>':'')
+      + '<button class="btn dg sm" data-a="del" data-i="'+i+'">삭제</button>'
+      + '</div></div>';
+  });
+  p.innerHTML = h + '</div>';
+
+  p.querySelectorAll('button[data-a]').forEach(b=>{
+    b.onclick = ()=>{
+      const r = ROWS[Number(b.dataset.i)];
+      if(b.dataset.a==='copy') return copy(linkOf(r));
+      if(b.dataset.a==='view') return viewOne(r);
+      if(b.dataset.a==='del')  return delOne(r);
+    };
+  });
+}
+
+function viewOne(r){
+  const m = modal('<h3>'+esc(r.building_name)+'</h3>'
+    + '<p>실시일 '+fmtDate(r.survey_date)+' · 제출 '+fmtDate(r.submitted_at)+'</p>'
+    + answersHTML(r.answers||{})
+    + '<div class="acts"><button class="btn gh" id="vClose">닫기</button>'
+    + '<button class="btn pri" id="vPrint">PDF로 저장</button></div>');
+  m.querySelector('.modal').classList.add('wide');
+  $('#vClose', m).onclick = ()=> m.remove();
+  $('#vPrint', m).onclick = ()=> printOne(r);
+}
+
+function printOne(r){
+  const w = window.open('', '_blank');
+  if(!w) return toast('팝업이 차단되었습니다');
+  const css = document.querySelector('style').textContent;
+  w.document.write('<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8">'
+    + '<title>'+esc(r.building_name)+' 한 달 리뷰</title>'
+    + '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">'
+    + '<style>'+css+'</style></head><body><div class="wrap">'
+    + '<header class="top"><div class="eyebrow">둥지 · 건물관리 서비스</div>'
+    + '<h1>한 달 리뷰 설문</h1><div class="metaline">'
+    + '<span class="chip">건물명 <strong>'+esc(r.building_name)+'</strong></span>'
+    + '<span class="chip">실시일 <strong>'+fmtDate(r.survey_date)+'</strong></span>'
+    + '<span class="chip">제출 <strong>'+fmtDate(r.submitted_at)+'</strong></span>'
+    + '</div></header>' + answersHTML(r.answers||{})
+    + '<footer class="ft"><span>한 달 리뷰 설문</span><span>㈜컨텍터스</span></footer>'
+    + '</div></body></html>');
+  w.document.close();
+  setTimeout(()=>{ w.focus(); w.print(); }, 700);
+}
+
+function delOne(r){
+  const m = modal('<h3>삭제하시겠습니까?</h3>'
+    + '<p>'+esc(r.building_name)+' 설문과 응답이 함께 삭제되며 복구할 수 없습니다.</p>'
+    + '<div class="acts"><button class="btn gh" id="dNo">취소</button>'
+    + '<button class="btn dg" id="dYes">삭제</button></div>');
+  $('#dNo', m).onclick = ()=> m.remove();
+  $('#dYes', m).onclick = async ()=>{
+    try{
+      await sbDelete(TABLE + '?id=eq.' + encodeURIComponent(r.id), ADMIN_KEY);
+      m.remove(); toast('삭제되었습니다'); await loadRows();
+    }catch(e){ toast(e.message); }
+  };
+}
+
+function drawStat(p){
+  const done = ROWS.filter(r=>r.status==='submitted');
+  if(!done.length){
+    p.innerHTML = '<div class="state"><h2>집계할 응답이 없습니다</h2><p>응답이 접수되면 이곳에 평균과 추천지수가 표시됩니다.</p></div>';
+    return;
+  }
+  const scaleQs = Q.filter(q=>q.type==='scale');
+  const avg = {};
+  scaleQs.forEach(q=>{
+    const vals = done.map(r=>(r.answers||{})[q.id]).filter(v=>typeof v==='number');
+    avg[q.id] = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : null;
+  });
+  const nps = done.map(r=>(r.answers||{}).q12).filter(v=>typeof v==='number');
+  const pro = nps.filter(v=>v>=9).length, det = nps.filter(v=>v<=6).length;
+  const npsScore = nps.length ? Math.round((pro-det)/nps.length*100) : null;
+  const tenant = done.filter(r=>((r.answers||{}).q7||'')!=='없었다' && (r.answers||{}).q7).length;
+
+  let h = '<div class="stats">'
+    + '<div class="stat"><div class="k">응답 수</div><div class="v">'+done.length+'</div></div>'
+    + '<div class="stat"><div class="k">전반 만족</div><div class="v">'+(avg.q11?avg.q11.toFixed(1):'—')+'<small> / 5</small></div></div>'
+    + '<div class="stat"><div class="k">NPS</div><div class="v">'+(npsScore===null?'—':npsScore)+'</div></div>'
+    + '<div class="stat"><div class="k">임차인 문의 발생</div><div class="v">'+tenant+'<small> 건물</small></div></div>'
+    + '</div><div class="ansbox"><p class="grp">문항별 평균</p>';
+  scaleQs.forEach(q=>{
+    h += '<div class="ansrow"><div class="qq">Q'+(Q.indexOf(q)+1)+'. '+esc(q.text)+'</div>'
+      + '<div class="aa">'+(avg[q.id]?avg[q.id].toFixed(1):'—')+'</div></div>';
+  });
+  h += '</div><p class="note">NPS는 9~10점 응답 비율에서 0~6점 응답 비율을 뺀 값입니다. '
+    + '전반 만족 3점 이하 또는 NPS 6점 이하 응답은 RM이 직접 확인하시길 권합니다.</p>';
+  p.innerHTML = h;
+}
+
+/* ═══ 시작 ═══ */
+route();
+</script>
+</body>
+</html>
