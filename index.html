@@ -225,11 +225,13 @@ html, body {
       <div class="login-logo-text">🏢 둥지</div>
       <div class="login-logo-sub">서비스 플랫폼 · 임직원 전용</div>
     </div>
-    <label class="login-label">아이디</label>
-    <input class="login-input" id="login-id" type="text" placeholder="아이디를 입력하세요" autocomplete="username">
-    <label class="login-label">비밀번호</label>
-    <input class="login-input" id="login-pw" type="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password">
-    <button class="login-btn" onclick="doLogin()">로그인</button>
+    <form id="loginForm" action="javascript:void(0)" onsubmit="doLogin();return false;">
+      <label class="login-label">아이디</label>
+      <input class="login-input" id="login-id" type="text" name="username" placeholder="아이디를 입력하세요" autocomplete="username">
+      <label class="login-label">비밀번호</label>
+      <input class="login-input" id="login-pw" type="password" name="password" placeholder="비밀번호를 입력하세요" autocomplete="current-password">
+      <button type="submit" class="login-btn">로그인</button>
+    </form>
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
@@ -285,6 +287,43 @@ html, body {
     </div>
   </div>
 
+  <!-- 운영 관리 -->
+  <div class="section">
+    <div class="section-label">운영 관리</div>
+    <div class="app-grid">
+
+      <!-- 신규계약 인수인계 체크리스트 -->
+      <a class="app-card" href="./checklist.html"
+         style="--card-color:#059669;--card-bg:#ecfdf5;--card-border:#a7f3d0">
+        <div class="app-card-icon"><i class="ti ti-checklist"></i></div>
+        <div class="app-card-body">
+          <div class="app-card-name">신규계약 인수인계 체크리스트</div>
+          <div class="app-card-desc">신규 계약 건물 인수인계 진행 상태 관리 · 서류 체크 · 피드백</div>
+        </div>
+        <div class="app-card-foot">
+          <span class="app-card-badge" style="background:#ecfdf5;color:#059669;border-color:#a7f3d0">운영</span>
+          <i class="ti ti-arrow-right app-card-arrow"></i>
+        </div>
+      </a>
+
+      <!-- 한 달 리뷰 설문 -->
+      <a class="app-card" href="./review.html"
+         style="--card-color:#d97706;--card-bg:#fffbeb;--card-border:#fde68a">
+        <span class="badge-new">NEW</span>
+        <div class="app-card-icon"><i class="ti ti-star"></i></div>
+        <div class="app-card-body">
+          <div class="app-card-name">한 달 리뷰 설문</div>
+          <div class="app-card-desc">관리 시작 1개월 후 건물주 만족도 조사 · 서비스 품질 점검</div>
+        </div>
+        <div class="app-card-foot">
+          <span class="app-card-badge" style="background:#fffbeb;color:#d97706;border-color:#fde68a">설문</span>
+          <i class="ti ti-arrow-right app-card-arrow"></i>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
 </div>
 
 <div class="footer">© 2026 ㈜컨텍터스 · 둥지 &nbsp;|&nbsp; 1577-9489</div>
@@ -327,14 +366,6 @@ function doLogout() {
   document.getElementById('login-error').textContent = '';
   document.getElementById('login-overlay').style.display = 'flex';
 }
-
-// 엔터키 로그인
-document.getElementById('login-pw').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doLogin();
-});
-document.getElementById('login-id').addEventListener('keydown', e => {
-  if (e.key === 'Enter') document.getElementById('login-pw').focus();
-});
 
 // 세션 유지 확인
 (function checkSession() {
