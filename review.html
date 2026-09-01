@@ -639,11 +639,8 @@ let ROWS = [];
 
 function renderAdmin(){
   if(!configured()) return renderSetupNeeded();
-  if(!ADMIN_KEY){
-    const t = sessionStorage.getItem(KEY_STORE);
-    if(t) ADMIN_KEY = { apikey: SUPABASE_ANON, bearer: t };
-  }
-  if(!ADMIN_KEY) return renderKeyGate();
+  // 로그인 없이 바로 접근
+  ADMIN_KEY = { apikey: SUPABASE_ANON, bearer: SUPABASE_ANON };
   drawAdmin();
   loadRows();
 }
